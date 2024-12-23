@@ -16,6 +16,7 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   programs.nix-ld.enable = true;
+   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
   networking.hostName = "Bromma-Laptop"; # Define your hostname.
 
