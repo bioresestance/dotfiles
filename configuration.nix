@@ -13,10 +13,11 @@
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
+  boot.kernelPackages = pkgs.linuxPackages_latest;
 
-  networking.hostName = "nixos"; # Define your hostname.
-  # networking.wireless.enable = true;  # Enables wireless support via wpa_supplicant.
+  programs.nix-ld.enable = true;
 
+  networking.hostName = "Bromma-Laptop"; # Define your hostname.
 
   # Enable networking
   networking.networkmanager.enable = true;
@@ -27,56 +28,170 @@
   # Select internationalisation properties.
   i18n.defaultLocale = "en_CA.UTF-8";
 
+
+  # Enable the KDE Plasma Desktop Environment.
+  services.displayManager.sddm ={
+	enable = true;
+	wayland.enable = true;
+};
+  services.desktopManager.plasma6.enable = true;
+
   # Configure keymap in X11
-  services.xserver = {
-    enable = true;
+  services.xserver.xkb = {
     layout = "us";
-    xkbVariant = "";
-    displayManager = {
-       sddm = { enable = true;};
-    };
+    variant = "";
   };
+
+  # Enable CUPS to print documents.
+  services.printing.enable = true;
+
+  # Enable sound with pipewire.
+  hardware.pulseaudio.enable = false;
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
+  services.pipewire.wireplumber.enable = true;
+
+  # Enable touchpad support (enabled default in most desktopManager).
+  # services.xserver.libinput.enable = true;
 
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.aaron = {
     isNormalUser = true;
     description = "Aaron Bromma";
-    extraGroups = [ "networkmanager" "wheel" ];
-    packages = with pkgs; [];
+    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    packages = with pkgs; [
+      kdePackages.kate
+    #  thunderbird
+    ];
   };
 
   # Enable automatic login for the user.
-  services.getty.autologinUser = "aaron";
+  services.displayManager.autoLogin.enable = true;
+  services.displayManager.autoLogin.user = "aaron";
+  services.displayManager.defaultSession = "plasma";
+
+
+  # Install firefox.
+  programs.firefox.enable = true;
+  services.fwupd.enable = true;
+  services.tailscale.enable = true;
 
   # Allow unfree packages
   nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
-  # $ nix search wget
   environment.systemPackages = with pkgs; [
-   vim # Do not forget to add an editor to edit configuration.nix! The Nano editor is also installed by default.
-   wget
-   vscode
-   neovim
-   git
+    pciutils
+    vim
+    neovim
+    vscode
+    kitty
+    lshw
+    google-chrome
+    pavucontrol
+    git
+    gcc14
+    okular
+    bat
+    powertop
+    htop
+    stirling-pdf
+    wget
+    tailscale
+    just
+    nodejs_23
+#     python312
+    tmux
+    uv
   ];
 
-  # Some programs need SUID wrappers, can be configured further or are
-  # started in user sessions.
-  # programs.mtr.enable = true;
-  # programs.gnupg.agent = {
-  #   enable = true;
-  #   enableSSHSupport = true;
-  # };
 
-  # List services that you want to enable:
+  hardware.enableAllFirmware = true;
+  services.hardware.bolt.enable = true;
 
-  # Enable the OpenSSH daemon.
-  services.openssh.enable = true;
+# Enable OpenGL
+  hardware.graphics = {
+    enable = true;
+    enable32Bit = true;
+  };
 
-  # Open ports in the firewall.
-  networking.firewall.allowedTCPPorts = [ 22 ];
-  networking.firewall.allowedUDPPorts = [ 22 ];
+  # Load nvidia driver for Xorg and Wayland
+  services.xserver.videoDrivers = ["nvidia"];
+
+  hardware.nvidia = {
+
+    # Modesetting is required.
+    modesetting.enable = true;
+
+    # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
+    # Enable this if you have graphical corruption issues or application crashes after waking
+    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead
+    # of just the bare essentials.
+    powerManagement.enable = true;
+
+    # Fine-grained power management. Turns off GPU when not in use.
+    # Experimental and only works on modern Nvidia GPUs (Turing or newer).
+    powerManagement.finegrained = true;
+
+    # Use the NVidia open source kernel module (not to be confused with the
+    # independent third-party "nouveau" open source driver).
+    open = true;
+
+    # Enable the Nvidia settings menu,
+	# accessible via `nvidia-settings`.
+    nvidiaSettings = true;
+
+    # Optionally, you may need to select the appropriate driver version for your specific GPU.
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    # forceFullCompositionPipeline = true;
+
+    prime = {
+		offload = {
+			enable = true;
+			enableOffloadCmd = true;
+		};
+		#Make sure to use the correct Bus ID values for your system!
+		nvidiaBusId = "PCI:54:0:0";
+        amdgpuBusId = "PCI:55:0:0";
+	};
+  };
+
+
+hardware.bluetooth = {
+  enable = true;
+  powerOnBoot = true;
+  settings = {
+      General = {
+          Experimental = true;
+      };
+  };
+};
+
+
+virtualisation.docker.enable = true;
+powerManagement.enable = true;
+
+
+programs._1password.enable = true;
+programs._1password-gui = {
+  enable = true;
+  polkitPolicyOwners = [ "aaron" ];
+};
+
+
+programs.steam = {
+  enable = true;
+  remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
+  dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
+  localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
+  gamescopeSession.enable = true;
+};
+
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
@@ -84,13 +199,6 @@
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).
-  system.stateVersion = "24.05"; # Did you read the comment?
-
-  programs.hyprland = {
-     enable = true;
-     xwayland.enable = true;
-  };
-
-
+  system.stateVersion = "24.11"; # Did you read the comment?
 
 }

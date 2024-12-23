@@ -4,25 +4,29 @@
 { config, lib, pkgs, modulesPath, ... }:
 
 {
-  imports = [ ];
+  imports =
+    [ (modulesPath + "/installer/scan/not-detected.nix")
+    ];
 
-  boot.initrd.availableKernelModules = [ "sd_mod" "sr_mod" ];
-  boot.initrd.kernelModules = [ ];
-  boot.kernelModules = [ ];
-  boot.extraModulePackages = [ ];
+  boot.initrd.availableKernelModules = [ "nvme" "xhci_pci" "thunderbolt" "usbhid" "usb_storage" "sd_mod" "sdhci_pci" ];
+  boot.initrd.kernelModules = ["nvidia" ];
+  boot.kernelModules = [ "kvm-amd" ];
+  boot.extraModulePackages = [config.boot.kernelPackages.nvidia_x11 ];
 
   fileSystems."/" =
-    { device = "/dev/disk/by-uuid/358052af-b07d-465f-bef7-724e9cda126c";
+    { device = "/dev/disk/by-uuid/d581d3ad-b02a-45bc-a97b-53e86ef3c86c";
       fsType = "ext4";
     };
 
   fileSystems."/boot" =
-    { device = "/dev/disk/by-uuid/7EE8-7A8A";
+    { device = "/dev/disk/by-uuid/1F2B-A409";
       fsType = "vfat";
-      options = [ "fmask=0022" "dmask=0022" ];
+      options = [ "fmask=0077" "dmask=0077" ];
     };
 
-  swapDevices = [ ];
+  swapDevices =
+    [ { device = "/dev/disk/by-uuid/d293d92d-a05d-41a6-8704-8378dff1157f"; }
+    ];
 
   # Enables DHCP on each ethernet and wireless interface. In case of scripted networking
   # (the default) this is the recommended approach. When using systemd-networkd it's
@@ -32,5 +36,5 @@
   # networking.interfaces.eth0.useDHCP = lib.mkDefault true;
 
   nixpkgs.hostPlatform = lib.mkDefault "x86_64-linux";
-  virtualisation.hypervGuest.enable = true;
+  hardware.cpu.amd.updateMicrocode = lib.mkDefault config.hardware.enableRedistributableFirmware;
 }
