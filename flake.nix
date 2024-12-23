@@ -1,19 +1,25 @@
 {
-    description = "NixOS configurations";
+  description = "NixOS configurations";
 
-    inputs = {
-        nixpkgs.url = "nixpkgs/nixos-unstable";
-    };
+  inputs = {
+    nixpkgs.url = "nixpkgs/nixos-unstable";
+  };
 
-    outputs = { self, nixpkgs }: {
-        nixosConfigurations = {
+  outputs =
+    { self, nixpkgs }:
+    {
+      nixosConfigurations = {
 
-            Bromma-Laptop = nixpkgs.lib.nixosSystem {
-                system = "x86_64-linux";
-                modules = [
-                    ./configuration.nix
-                ];
-            };
+        Bromma-Laptop = nixpkgs.lib.nixosSystem {
+          system = "x86_64-linux";
+          modules = [
+            ./configuration.nix
+          ];
         };
+      };
+
+      # homeConfigurations = {
+
+      # };
     };
 }

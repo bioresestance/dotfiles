@@ -2,13 +2,17 @@
 # your system.  Help is available in the configuration.nix(5) man page
 # and in the NixOS manual (accessible by running ‘nixos-help’).
 
-{ config, pkgs, ... }:
+{
+  config,
+  pkgs,
+  ...
+}:
 
 {
-  imports =
-    [ # Include the results of the hardware scan.
-      ./hardware-configuration.nix
-    ];
+  imports = [
+    # Include the results of the hardware scan.
+    ./hardware-configuration.nix
+  ];
 
   # Bootloader.
   boot.loader.systemd-boot.enable = true;
@@ -16,7 +20,12 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
 
   programs.nix-ld.enable = true;
-   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nix.settings.experimental-features = [
+    "nix-command"
+    "flakes"
+  ];
+
+  # nix.nixPath = ["nixPkgs=${inputs.nixpkgs}"];
 
   networking.hostName = "Bromma-Laptop"; # Define your hostname.
 
@@ -29,12 +38,11 @@
   # Select internationalisation properties.
   i18n.defaultLocale = "en_CA.UTF-8";
 
-
   # Enable the KDE Plasma Desktop Environment.
-  services.displayManager.sddm ={
-	enable = true;
-	wayland.enable = true;
-};
+  services.displayManager.sddm = {
+    enable = true;
+    wayland.enable = true;
+  };
   services.desktopManager.plasma6.enable = true;
 
   # Configure keymap in X11
@@ -64,10 +72,14 @@
   users.users.aaron = {
     isNormalUser = true;
     description = "Aaron Bromma";
-    extraGroups = [ "networkmanager" "wheel" "docker" ];
+    extraGroups = [
+      "networkmanager"
+      "wheel"
+      "docker"
+    ];
     packages = with pkgs; [
       kdePackages.kate
-    #  thunderbird
+      #  thunderbird
     ];
   };
 
@@ -75,7 +87,6 @@
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = "aaron";
   services.displayManager.defaultSession = "plasma";
-
 
   # Install firefox.
   programs.firefox.enable = true;
@@ -106,23 +117,24 @@
     tailscale
     just
     nodejs_23
-#     python312
+    python312
+    nixfmt-rfc-style
     tmux
     uv
+    nixd
   ];
-
 
   hardware.enableAllFirmware = true;
   services.hardware.bolt.enable = true;
 
-# Enable OpenGL
+  # Enable OpenGL
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
   };
 
   # Load nvidia driver for Xorg and Wayland
-  services.xserver.videoDrivers = ["nvidia"];
+  services.xserver.videoDrivers = [ "nvidia" ];
 
   hardware.nvidia = {
 
@@ -144,7 +156,7 @@
     open = true;
 
     # Enable the Nvidia settings menu,
-	# accessible via `nvidia-settings`.
+    # accessible via `nvidia-settings`.
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
@@ -152,47 +164,42 @@
     # forceFullCompositionPipeline = true;
 
     prime = {
-		offload = {
-			enable = true;
-			enableOffloadCmd = true;
-		};
-		#Make sure to use the correct Bus ID values for your system!
-		nvidiaBusId = "PCI:54:0:0";
-        amdgpuBusId = "PCI:55:0:0";
-	};
-  };
-
-
-hardware.bluetooth = {
-  enable = true;
-  powerOnBoot = true;
-  settings = {
-      General = {
-          Experimental = true;
+      offload = {
+        enable = true;
+        enableOffloadCmd = true;
       };
+      #Make sure to use the correct Bus ID values for your system!
+      nvidiaBusId = "PCI:64:0:0";
+      amdgpuBusId = "PCI:65:0:0";
+    };
   };
-};
 
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+    settings = {
+      General = {
+        Experimental = true;
+      };
+    };
+  };
 
-virtualisation.docker.enable = true;
-powerManagement.enable = true;
+  virtualisation.docker.enable = true;
+  powerManagement.enable = true;
 
+  programs._1password.enable = true;
+  programs._1password-gui = {
+    enable = true;
+    polkitPolicyOwners = [ "aaron" ];
+  };
 
-programs._1password.enable = true;
-programs._1password-gui = {
-  enable = true;
-  polkitPolicyOwners = [ "aaron" ];
-};
-
-
-programs.steam = {
-  enable = true;
-  remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-  dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-  localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
-  gamescopeSession.enable = true;
-};
-
+  programs.steam = {
+    enable = true;
+    remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
+    dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
+    localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
+    gamescopeSession.enable = true;
+  };
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
