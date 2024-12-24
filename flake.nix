@@ -25,7 +25,7 @@
       nixosConfigurations = {
         Bromma-Laptop = lib.nixosSystem {
           inherit system;
-          modules = [ ./configuration.nix ];
+          modules = [ ./Systems/Bromma-Laptop/configuration.nix ];
         };
       };
       homeConfigurations = {
