@@ -18,6 +18,10 @@
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest;
+  boot.kernelParams = [
+    "amdgpu.exp_hw_support=1" # For experimental GPU support, if applicable
+  ];
+  hardware.amdgpu.initrd.enable = true;
 
   programs.nix-ld.enable = true;
   nix.settings.experimental-features = [
@@ -79,7 +83,6 @@
     ];
     packages = with pkgs; [
       kdePackages.kate
-      #  thunderbird
     ];
   };
 
@@ -98,6 +101,7 @@
 
   # List packages installed in system profile. To search, run:
   environment.systemPackages = with pkgs; [
+    linux-firmware
     pciutils
     vim
     neovim
@@ -122,6 +126,9 @@
     tmux
     uv
     nixd
+    nvtopPackages.full
+    # gnome-disk-utility
+    gparted
   ];
 
   hardware.enableAllFirmware = true;
@@ -134,7 +141,10 @@
   };
 
   # Load nvidia driver for Xorg and Wayland
-  services.xserver.videoDrivers = [ "nvidia" ];
+  services.xserver.videoDrivers = [
+    "nvidia"
+    "amdgpu"
+  ];
 
   hardware.nvidia = {
 
@@ -168,6 +178,7 @@
         enable = true;
         enableOffloadCmd = true;
       };
+      reverseSync.enable = true;
       #Make sure to use the correct Bus ID values for your system!
       nvidiaBusId = "PCI:64:0:0";
       amdgpuBusId = "PCI:65:0:0";

@@ -16,16 +16,21 @@
   home.sessionVariables = {
   };
 
+  home.shellAliases = {
+    ll = "ls -l";
+    ".." = "cd ..";
+    home-rebuild = "home-manager switch --flake /home/aaron/.dotfiles";
+    nix-rebuild = "sudo nixos-rebuild switch --flake /home/aaron/.dotfiles";
+  };
+
   programs.bash = {
     enable = true;
-    enableCompletion = true;
+  };
 
-    shellAliases = {
-      ll = "ls -l";
-      ".." = "cd ..";
-      home-rebuild = "home-manager switch --flake /home/aaron/.dotfiles";
-      nix-rebuild = "sudo nixos-rebuild switch --flake /home/aaron/.dotfiles";
-    };
+  programs.git = {
+    enable = true;
+    userName = "Aaron Bromma";
+    userEmail = "aaron@bromma.dev";
   };
 
   # Let Home Manager install and manage itself.

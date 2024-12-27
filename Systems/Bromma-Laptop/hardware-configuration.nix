@@ -24,7 +24,9 @@
     "sdhci_pci"
   ];
   boot.initrd.kernelModules = [ "nvidia" ];
-  boot.kernelModules = [ "kvm-amd" ];
+  boot.kernelModules = [
+    "kvm-amd"
+  ];
   boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
 
   fileSystems."/" = {
