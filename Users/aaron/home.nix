@@ -11,6 +11,13 @@
   ];
 
   home.file = {
+    ".config/1Password/ssh/agent.toml" = {
+      enable = true;
+      text = ''
+        [[ssh-keys]]
+        vault = "Development"
+      '';
+    };
   };
 
   home.sessionVariables = {
@@ -31,6 +38,17 @@
     enable = true;
     userName = "Aaron Bromma";
     userEmail = "aaron@bromma.dev";
+  };
+
+  programs.ssh = {
+    enable = true;
+    matchBlocks = {
+      "*" = {
+        extraOptions = {
+          identityAgent = "~/.1password/agent.sock";
+        };
+      };
+    };
   };
 
   # Let Home Manager install and manage itself.

@@ -31,7 +31,7 @@
       homeConfigurations = {
         aaron = home-manager.lib.homeManagerConfiguration {
           inherit pkgs;
-          modules = [ ./home.nix ];
+          modules = [ ./Users/aaron/home.nix ];
         };
       };
     };
