@@ -43,6 +43,7 @@
   programs.ssh = {
     enable = true;
     matchBlocks = {
+      # Use the 1Password SSH agent for all hosts.
       "*" = {
         extraOptions = {
           identityAgent = "~/.1password/agent.sock";
