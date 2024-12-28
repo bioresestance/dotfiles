@@ -5,6 +5,7 @@
 {
   config,
   pkgs,
+  nix-vscode-extensions,
   ...
 }:
 
