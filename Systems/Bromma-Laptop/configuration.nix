@@ -130,6 +130,7 @@
     # gnome-disk-utility
     gparted
     ansible
+    plexamp
   ];
 
   hardware.enableAllFirmware = true;
