@@ -129,6 +129,7 @@
     nvtopPackages.full
     # gnome-disk-utility
     gparted
+    ansible
   ];
 
   hardware.enableAllFirmware = true;

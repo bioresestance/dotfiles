@@ -7,7 +7,8 @@
   home.homeDirectory = "/home/aaron";
   home.stateVersion = "24.11"; # Please read the comment before changing.
 
-  home.packages = [
+  home.packages = with pkgs; [
+    eza
   ];
 
   home.file = {
@@ -28,6 +29,7 @@
     ".." = "cd ..";
     home-rebuild = "home-manager switch --flake /home/aaron/.dotfiles";
     nix-rebuild = "sudo nixos-rebuild switch --flake /home/aaron/.dotfiles";
+    ls = "eza -l";
   };
 
   programs.bash = {
