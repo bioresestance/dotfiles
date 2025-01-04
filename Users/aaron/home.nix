@@ -9,6 +9,8 @@
 
   home.packages = with pkgs; [
     eza
+    cmatrix
+    cowsay
   ];
 
   home.file = {
