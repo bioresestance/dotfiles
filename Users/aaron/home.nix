@@ -54,6 +54,12 @@
     };
   };
 
+  programs.tmux = {
+    enable = true;
+    mouse = true;
+    newSession = true;
+  };
+
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
 }
