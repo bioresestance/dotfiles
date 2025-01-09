@@ -131,6 +131,7 @@
     gparted
     ansible
     plexamp
+    bambu-studio
   ];
 
   hardware.enableAllFirmware = true;
