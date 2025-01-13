@@ -59,7 +59,6 @@
   services.printing.enable = true;
 
   # Enable sound with pipewire.
-  hardware.pulseaudio.enable = false;
   security.rtkit.enable = true;
   services.pipewire = {
     enable = true;
@@ -131,7 +130,14 @@
     gparted
     ansible
     plexamp
+    snapmaker-luban
+    # orca-slicer
     bambu-studio
+    gnome-firmware
+  ];
+
+  nixpkgs.config.permittedInsecurePackages = [
+    "snapmaker-luban-4.14.0"
   ];
 
   hardware.enableAllFirmware = true;
@@ -158,11 +164,11 @@
     # Enable this if you have graphical corruption issues or application crashes after waking
     # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead
     # of just the bare essentials.
-    powerManagement.enable = true;
+    # powerManagement.enable = true;
 
-    # Fine-grained power management. Turns off GPU when not in use.
-    # Experimental and only works on modern Nvidia GPUs (Turing or newer).
-    powerManagement.finegrained = true;
+    # # Fine-grained power management. Turns off GPU when not in use.
+    # # Experimental and only works on modern Nvidia GPUs (Turing or newer).
+    # powerManagement.finegrained = true;
 
     # Use the NVidia open source kernel module (not to be confused with the
     # independent third-party "nouveau" open source driver).
@@ -173,8 +179,8 @@
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
-    # forceFullCompositionPipeline = true;
+    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    forceFullCompositionPipeline = true;
 
     prime = {
       offload = {
