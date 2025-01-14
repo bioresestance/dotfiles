@@ -134,6 +134,7 @@
     # orca-slicer
     bambu-studio
     gnome-firmware
+    libreoffice
   ];
 
   nixpkgs.config.permittedInsecurePackages = [
