@@ -131,10 +131,12 @@
     ansible
     plexamp
     snapmaker-luban
-    # orca-slicer
+    orca-slicer
     bambu-studio
     gnome-firmware
     libreoffice
+    kicad
+    gimp
   ];
 
   nixpkgs.config.permittedInsecurePackages = [
