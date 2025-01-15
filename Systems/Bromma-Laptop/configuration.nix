@@ -126,7 +126,6 @@
     uv
     nixd
     nvtopPackages.full
-    # gnome-disk-utility
     gparted
     ansible
     plexamp
@@ -137,6 +136,7 @@
     libreoffice
     kicad
     gimp
+    tldr
   ];
 
   nixpkgs.config.permittedInsecurePackages = [
