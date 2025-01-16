@@ -137,6 +137,8 @@
     kicad
     gimp
     tldr
+    okular
+    mongodb-tools
   ];
 
   nixpkgs.config.permittedInsecurePackages = [
