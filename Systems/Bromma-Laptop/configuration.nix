@@ -21,6 +21,7 @@
   boot.kernelParams = [
     "amdgpu.exp_hw_support=1" # For experimental GPU support, if applicable
   ];
+  boot.blacklistedKernelModules = [ "nouveau" ];
   hardware.amdgpu.initrd.enable = true;
 
   programs.nix-ld.enable = true;
@@ -139,6 +140,10 @@
     tldr
     okular
     mongodb-tools
+    xorg.xrandr
+    jdk21_headless
+    hugo
+    filezilla
   ];
 
   nixpkgs.config.permittedInsecurePackages = [
@@ -169,11 +174,11 @@
     # Enable this if you have graphical corruption issues or application crashes after waking
     # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead
     # of just the bare essentials.
-    # powerManagement.enable = true;
+    powerManagement.enable = true;
 
     # # Fine-grained power management. Turns off GPU when not in use.
     # # Experimental and only works on modern Nvidia GPUs (Turing or newer).
-    # powerManagement.finegrained = true;
+    powerManagement.finegrained = true;
 
     # Use the NVidia open source kernel module (not to be confused with the
     # independent third-party "nouveau" open source driver).
@@ -192,10 +197,9 @@
         enable = true;
         enableOffloadCmd = true;
       };
-      reverseSync.enable = true;
       #Make sure to use the correct Bus ID values for your system!
-      nvidiaBusId = "PCI:64:0:0";
-      amdgpuBusId = "PCI:65:0:0";
+      nvidiaBusId = "PCI:100:0:0";
+      amdgpuBusId = "PCI:101:0:0";
     };
   };
 
