@@ -12,6 +12,7 @@
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
+    ../../Modules/Common/Printing
   ];
 
   # Bootloader.
@@ -29,8 +30,6 @@
     "nix-command"
     "flakes"
   ];
-
-  # nix.nixPath = ["nixPkgs=${inputs.nixpkgs}"];
 
   networking.hostName = "Bromma-Laptop"; # Define your hostname.
 
@@ -56,9 +55,6 @@
     variant = "";
   };
 
-  # Enable CUPS to print documents.
-  services.printing.enable = true;
-
   # Enable sound with pipewire.
   security.rtkit.enable = true;
   services.pipewire = {
@@ -69,9 +65,6 @@
   };
   services.pipewire.wireplumber.enable = true;
 
-  # Enable touchpad support (enabled default in most desktopManager).
-  # services.xserver.libinput.enable = true;
-
   # Define a user account. Don't forget to set a password with ‘passwd’.
   users.users.aaron = {
     isNormalUser = true;
@@ -80,11 +73,14 @@
       "networkmanager"
       "wheel"
       "docker"
+      "lpadmin"
     ];
     packages = with pkgs; [
       kdePackages.kate
     ];
   };
+
+  services.printer.enable = true;
 
   # Enable automatic login for the user.
   services.displayManager.autoLogin.enable = true;
@@ -144,6 +140,7 @@
     jdk21_headless
     hugo
     filezilla
+    skanlite
   ];
 
   nixpkgs.config.permittedInsecurePackages = [
