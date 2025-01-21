@@ -14,6 +14,7 @@
     ./hardware-configuration.nix
     ../../Modules/Common
     ../../Modules/Users/aaron
+    ../../Modules/Applications/3DPrinting
   ];
 
   # Bootloader.
@@ -112,9 +113,6 @@
     gparted
     ansible
     plexamp
-    snapmaker-luban
-    orca-slicer
-    bambu-studio
     gnome-firmware
     libreoffice
     kicad
@@ -128,10 +126,6 @@
     filezilla
     skanlite
     kdePackages.kate
-  ];
-
-  nixpkgs.config.permittedInsecurePackages = [
-    "snapmaker-luban-4.14.0"
   ];
 
   hardware.enableAllFirmware = true;
@@ -213,6 +207,8 @@
     localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
     gamescopeSession.enable = true;
   };
+
+  module.apps.ThreeDPrinting.enable = true;
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
