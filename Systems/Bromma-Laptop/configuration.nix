@@ -12,7 +12,8 @@
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
-    ../../Modules/Common/Printing
+    ../../Modules/Common
+    ../../Modules/Users/aaron
   ];
 
   # Bootloader.
@@ -65,22 +66,7 @@
   };
   services.pipewire.wireplumber.enable = true;
 
-  # Define a user account. Don't forget to set a password with ‘passwd’.
-  users.users.aaron = {
-    isNormalUser = true;
-    description = "Aaron Bromma";
-    extraGroups = [
-      "networkmanager"
-      "wheel"
-      "docker"
-      "lpadmin"
-    ];
-    packages = with pkgs; [
-      kdePackages.kate
-    ];
-  };
-
-  services.printer.enable = true;
+  module.common.printing.enable = true;
 
   # Enable automatic login for the user.
   services.displayManager.autoLogin.enable = true;
@@ -141,6 +127,7 @@
     hugo
     filezilla
     skanlite
+    kdePackages.kate
   ];
 
   nixpkgs.config.permittedInsecurePackages = [

@@ -6,11 +6,11 @@
 }:
 with lib;
 let
-  cfg = config.services.printer;
+  cfg = config.module.common.printing;
 in
 {
   options = {
-    services.printer.enable = mkOption {
+    module.common.printing.enable = mkOption {
       description = "Enable printing services.";
       default = false;
       type = types.bool;
