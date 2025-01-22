@@ -12,7 +12,7 @@ in
   options = {
     module.common.printing.enable = mkOption {
       description = "Enable printing services.";
-      default = false;
+      default = true;
       type = types.bool;
     };
 

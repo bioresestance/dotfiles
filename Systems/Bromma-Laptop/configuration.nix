@@ -15,6 +15,7 @@
     ../../Modules/Common
     ../../Modules/Users/aaron
     ../../Modules/Applications/3DPrinting
+    ../../Modules/Applications/Tailscale
   ];
 
   # Bootloader.
@@ -28,21 +29,11 @@
   hardware.amdgpu.initrd.enable = true;
 
   programs.nix-ld.enable = true;
-  nix.settings.experimental-features = [
-    "nix-command"
-    "flakes"
-  ];
 
   networking.hostName = "Bromma-Laptop"; # Define your hostname.
 
   # Enable networking
   networking.networkmanager.enable = true;
-
-  # Set your time zone.
-  time.timeZone = "America/Vancouver";
-
-  # Select internationalisation properties.
-  i18n.defaultLocale = "en_CA.UTF-8";
 
   # Enable the KDE Plasma Desktop Environment.
   services.displayManager.sddm = {
@@ -67,8 +58,6 @@
   };
   services.pipewire.wireplumber.enable = true;
 
-  module.common.printing.enable = true;
-
   # Enable automatic login for the user.
   services.displayManager.autoLogin.enable = true;
   services.displayManager.autoLogin.user = "aaron";
@@ -77,10 +66,6 @@
   # Install firefox.
   programs.firefox.enable = true;
   services.fwupd.enable = true;
-  services.tailscale.enable = true;
-
-  # Allow unfree packages
-  nixpkgs.config.allowUnfree = true;
 
   # List packages installed in system profile. To search, run:
   environment.systemPackages = with pkgs; [
@@ -101,7 +86,6 @@
     htop
     stirling-pdf
     wget
-    tailscale
     just
     nodejs_23
     python312
