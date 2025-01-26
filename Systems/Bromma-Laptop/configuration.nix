@@ -108,9 +108,14 @@
     jdk21_headless
     hugo
     filezilla
-    skanlite
+    simple-scan
     kdePackages.kate
+    sshpass
+    asusctl
+    nmap
   ];
+
+  services.asusd.enable = true;
 
   hardware.enableAllFirmware = true;
   services.hardware.bolt.enable = true;
@@ -151,7 +156,7 @@
     nvidiaSettings = true;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    package = config.boot.kernelPackages.nvidiaPackages.latest;
     forceFullCompositionPipeline = true;
 
     prime = {
