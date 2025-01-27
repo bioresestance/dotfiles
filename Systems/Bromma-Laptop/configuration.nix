@@ -113,6 +113,7 @@
     sshpass
     asusctl
     nmap
+    cifs-utils
   ];
 
   services.asusd.enable = true;
@@ -198,6 +199,34 @@
   };
 
   module.apps.ThreeDPrinting.enable = true;
+
+  fileSystems."/mnt/Media" = {
+    device = "//192.168.69.57/Media";
+    fsType = "cifs";
+    options = [
+      "credentials=/home/aaron/.dotfiles/smb-credentials"
+      "uid=1000"
+      "gid=1000"
+      "iocharset=utf8"
+      "vers=3.0"
+      "x-systemd.requires=network-online.target"
+      "x-systemd.mount-timeout=30s"
+    ];
+  };
+
+  fileSystems."/mnt/Homes" = {
+    device = "//192.168.69.57/Homes";
+    fsType = "cifs";
+    options = [
+      "credentials=/home/aaron/.dotfiles/smb-credentials"
+      "uid=1000"
+      "gid=1000"
+      "iocharset=utf8"
+      "vers=3.0"
+      "x-systemd.requires=network-online.target"
+      "x-systemd.mount-timeout=30s"
+    ];
+  };
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
