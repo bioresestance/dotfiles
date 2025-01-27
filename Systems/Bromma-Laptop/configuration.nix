@@ -114,6 +114,7 @@
     asusctl
     nmap
     cifs-utils
+    vlc
   ];
 
   services.asusd.enable = true;
