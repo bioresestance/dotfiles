@@ -117,12 +117,22 @@
     vlc
     ollama-cuda
     lmstudio
+    gtk3
+    gtk4
+    adwaita-icon-theme
+    cudatoolkit
   ];
 
   services.ollama = {
     enable = true;
     acceleration = "cuda";
 
+  };
+
+  environment.variables = {
+    #   GTK_PATH = "${pkgs.gtk3}/lib/gtk-3.0";
+    # XDG_DATA_DIRS = "${pkgs.gtk3}/share:${pkgs.gtk4}/share:/usr/share";
+    GTK_THEME = "Adwaita";
   };
 
   services.asusd.enable = true;
@@ -141,10 +151,14 @@
   };
 
   # Load nvidia driver for Xorg and Wayland
-  services.xserver.videoDrivers = [
-    "nvidia"
-    "modesetting"
-  ];
+  services.xserver = {
+    enable = true;
+    videoDrivers = [
+      "nvidia"
+      "modesetting"
+      "amdgpu"
+    ];
+  };
 
   hardware.nvidia = {
 
@@ -163,7 +177,7 @@
 
     # Use the NVidia open source kernel module (not to be confused with the
     # independent third-party "nouveau" open source driver).
-    open = false;
+    open = true;
 
     # Enable the Nvidia settings menu,
     # accessible via `nvidia-settings`.
