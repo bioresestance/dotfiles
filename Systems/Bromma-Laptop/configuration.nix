@@ -80,6 +80,11 @@
     pavucontrol
     git
     gcc14
+    libgcc
+    gnumake
+    cmake
+    extra-cmake-modules
+    stdenv.cc.cc.lib
     okular
     bat
     powertop
@@ -96,6 +101,7 @@
     nvtopPackages.full
     gparted
     ansible
+    ansible-lint
     plexamp
     gnome-firmware
     libreoffice
@@ -115,12 +121,14 @@
     nmap
     cifs-utils
     vlc
-    ollama-cuda
-    lmstudio
+    # ollama-cuda
+    # lmstudio
     gtk3
     gtk4
     adwaita-icon-theme
     cudatoolkit
+    go
+    discord
   ];
 
   services.ollama = {
