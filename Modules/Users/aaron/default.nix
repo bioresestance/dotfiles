@@ -15,7 +15,10 @@ with lib;
         "wheel"
         "docker"
         "lpadmin"
+	"dialout"
       ];
     };
+    services.udev.packages = with pkgs; [ platformio-core.udev ];
   };
+
 }

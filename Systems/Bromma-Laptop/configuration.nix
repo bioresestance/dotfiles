@@ -70,10 +70,12 @@
   # List packages installed in system profile. To search, run:
   environment.systemPackages = with pkgs; [
     linux-firmware
+    libusb1
     pciutils
     vim
     neovim
     vscode
+    jetbrains.clion
     kitty
     lshw
     google-chrome
@@ -121,27 +123,12 @@
     nmap
     cifs-utils
     vlc
-    # ollama-cuda
-    # lmstudio
     gtk3
     gtk4
-    adwaita-icon-theme
-    cudatoolkit
     go
     discord
+    platformio
   ];
-
-  services.ollama = {
-    enable = true;
-    acceleration = "cuda";
-
-  };
-
-  environment.variables = {
-    #   GTK_PATH = "${pkgs.gtk3}/lib/gtk-3.0";
-    # XDG_DATA_DIRS = "${pkgs.gtk3}/share:${pkgs.gtk4}/share:/usr/share";
-    GTK_THEME = "Adwaita";
-  };
 
   services.asusd.enable = true;
 
@@ -152,10 +139,6 @@
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
-    extraPackages = with pkgs; [
-
-      libGL.dev
-    ];
   };
 
   # Load nvidia driver for Xorg and Wayland
@@ -163,7 +146,6 @@
     enable = true;
     videoDrivers = [
       "nvidia"
-      "modesetting"
       "amdgpu"
     ];
   };
@@ -183,17 +165,15 @@
     # # Experimental and only works on modern Nvidia GPUs (Turing or newer).
     powerManagement.finegrained = true;
 
-    # Use the NVidia open source kernel module (not to be confused with the
-    # independent third-party "nouveau" open source driver).
     open = true;
 
     # Enable the Nvidia settings menu,
     # accessible via `nvidia-settings`.
-    nvidiaSettings = true;
+    nvidiaSettings = false;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
     package = config.boot.kernelPackages.nvidiaPackages.stable;
-    # forceFullCompositionPipeline = true;
+    #forceFullCompositionPipeline = true;
 
     prime = {
       offload = {
