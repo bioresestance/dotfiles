@@ -82,12 +82,14 @@
     pavucontrol
     git
     gcc14
+    clang
+    clang-tools
+    cppcheck
     libgcc
     gnumake
     cmake
     extra-cmake-modules
     stdenv.cc.cc.lib
-    okular
     bat
     powertop
     htop
@@ -110,14 +112,14 @@
     kicad
     gimp
     tldr
-    okular
+    kdePackages.okular
+    kdePackages.kate
     mongodb-tools
     xorg.xrandr
     jdk21_headless
     hugo
     filezilla
     simple-scan
-    kdePackages.kate
     sshpass
     asusctl
     nmap
@@ -128,6 +130,7 @@
     go
     discord
     platformio
+    freecad-wayland
   ];
 
   services.asusd.enable = true;
@@ -172,7 +175,7 @@
     nvidiaSettings = false;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.stable;
+    package = config.boot.kernelPackages.nvidiaPackages.beta;
     #forceFullCompositionPipeline = true;
 
     prime = {
