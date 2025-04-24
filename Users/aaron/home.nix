@@ -42,6 +42,9 @@
     enable = true;
     userName = "Aaron Bromma";
     userEmail = "aaron@bromma.dev";
+    extraConfig = {
+      init.defaultBranch = "main";
+    };
   };
 
   programs.ssh = {
