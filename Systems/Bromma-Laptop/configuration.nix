@@ -133,6 +133,8 @@
     freecad-wayland
   ];
 
+  programs.zsh.enable = true;
+
   services.asusd.enable = true;
 
   hardware.enableAllFirmware = true;

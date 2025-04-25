@@ -15,8 +15,9 @@ with lib;
         "wheel"
         "docker"
         "lpadmin"
-	"dialout"
+        "dialout"
       ];
+      shell = pkgs.zsh;
     };
     services.udev.packages = with pkgs; [ platformio-core.udev ];
   };

@@ -11,6 +11,12 @@
     eza
     cmatrix
     cowsay
+    oh-my-zsh
+    fastfetch
+    kitty-themes
+    cascadia-code
+    zsh-autosuggestions
+    oh-my-posh
   ];
 
   home.file = {
@@ -64,6 +70,202 @@
     mouse = true;
     newSession = true;
   };
+
+  ################################# Shell Configs #################################
+
+  # Use the Catppuccin Mocha theme for Zsh syntax highlighting.
+  home.file.".config/zsh/catppuccin_zsh-syntax-highlighting.zsh".source = builtins.fetchurl {
+    url = "https://raw.githubusercontent.com/catppuccin/zsh-syntax-highlighting/main/themes/catppuccin_mocha-zsh-syntax-highlighting.zsh";
+    sha256 = "1x2105vl3iiym9a5b6zsclglff4xy3r4iddz53dnns7djy6cf21d";
+  };
+
+  # ZSH configuration.
+  programs.zsh = {
+    enable = true;
+    initContent = ''
+      source ~/.config/zsh/catppuccin_zsh-syntax-highlighting.zsh
+      fastfetch
+    '';
+    enableCompletion = true;
+    syntaxHighlighting.enable = true;
+    autosuggestion.enable = true;
+    history.size = 10000;
+    oh-my-zsh = {
+      enable = true;
+      plugins = [
+        "git"
+        "docker"
+        "docker-compose"
+        "z"
+      ];
+    };
+  };
+
+  programs.kitty = {
+    enable = true;
+    shellIntegration.enableZshIntegration = true;
+    font = {
+      size = 12;
+      name = "Cascadia Code";
+    };
+    themeFile = "Catppuccin-Mocha";
+    settings = {
+      background_opacity = 0.9;
+      window_background_opacity = 0.9;
+      scrollback_lines = 10000;
+      enable_audio_bell = false;
+      update_check_interval = 0;
+      confirm_os_window_close = 0;
+    };
+  };
+
+  programs.oh-my-posh = {
+    enable = true;
+    useTheme = "catppuccin";
+    enableZshIntegration = true;
+  };
+
+  programs.fastfetch = {
+    enable = true;
+    settings = {
+      logo = {
+        type = "builtin";
+        height = 15;
+        width = 30;
+        padding = {
+          top = 5;
+          left = 3;
+        };
+      };
+
+      modules = [
+        "break"
+        {
+          type = "custom";
+          format = "┌──────────────────────Hardware──────────────────────┐";
+        }
+        {
+          type = "host";
+          key = " PC";
+          keyColor = "green";
+        }
+        {
+          type = "cpu";
+          key = "│ ├";
+          keyColor = "green";
+        }
+        {
+          type = "gpu";
+          key = "│ ├󰍛";
+          keyColor = "green";
+        }
+        {
+          type = "memory";
+          key = "│ ├󰍛";
+          keyColor = "green";
+        }
+        {
+          type = "disk";
+          key = "└ └";
+          keyColor = "green";
+        }
+        {
+          type = "custom";
+          format = "└────────────────────────────────────────────────────┘";
+        }
+        "break"
+        {
+          type = "custom";
+          format = "┌──────────────────────Software──────────────────────┐";
+        }
+        {
+          type = "os";
+          key = " OS";
+          keyColor = "yellow";
+        }
+        {
+          type = "kernel";
+          key = "│ ├";
+          keyColor = "yellow";
+        }
+        {
+          type = "bios";
+          key = "│ ├";
+          keyColor = "yellow";
+        }
+        {
+          type = "packages";
+          key = "│ ├󰏖";
+          keyColor = "yellow";
+        }
+        {
+          type = "shell";
+          key = "└ └";
+          keyColor = "yellow";
+        }
+        "break"
+        {
+          type = "de";
+          key = " DE";
+          keyColor = "blue";
+        }
+        {
+          type = "lm";
+          key = "│ ├";
+          keyColor = "blue";
+        }
+        {
+          type = "wm";
+          key = "│ ├";
+          keyColor = "blue";
+        }
+        {
+          type = "wmtheme";
+          key = "│ ├󰉼";
+          keyColor = "blue";
+        }
+        {
+          type = "terminal";
+          key = "└ └";
+          keyColor = "blue";
+        }
+        {
+          type = "custom";
+          format = "└────────────────────────────────────────────────────┘";
+        }
+        "break"
+        {
+          type = "custom";
+          format = "┌────────────────────Uptime / Age / DT────────────────────┐";
+        }
+        {
+          type = "command";
+          key = "  OS Age ";
+          keyColor = "magenta";
+          text = ''
+            birth_install=$(stat -c %W /); current=$(date +%s); time_progression=$((current - birth_install)); days_difference=$((time_progression / 86400)); echo $days_difference days
+          '';
+        }
+        {
+          type = "uptime";
+          key = "  Uptime ";
+          keyColor = "magenta";
+        }
+        {
+          type = "datetime";
+          key = "  DateTime ";
+          keyColor = "magenta";
+        }
+        {
+          type = "custom";
+          format = "└─────────────────────────────────────────────────────────┘";
+        }
+        "break"
+      ];
+    };
+  };
+
+  #################################################################################
 
   # Let Home Manager install and manage itself.
   programs.home-manager.enable = true;
