@@ -96,7 +96,7 @@
     stirling-pdf
     wget
     just
-    nodejs_23
+    # nodejs_23
     python312
     nixfmt-rfc-style
     tmux

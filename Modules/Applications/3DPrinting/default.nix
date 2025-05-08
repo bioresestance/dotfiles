@@ -19,13 +19,13 @@ with lib;
 
   config = mkIf config.module.apps.ThreeDPrinting.enable {
     environment.systemPackages = with pkgs; [
-      # snapmaker-luban
+      snapmaker-luban
       orca-slicer
-      # bambu-studio
+      bambu-studio
     ];
 
-    # nixpkgs.config.permittedInsecurePackages = [
-    #   "snapmaker-luban-4.14.0"
-    # ];
+    nixpkgs.config.permittedInsecurePackages = [
+      "snapmaker-luban-4.15.0"
+    ];
   };
 }
