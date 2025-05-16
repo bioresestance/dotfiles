@@ -225,12 +225,11 @@
     fsType = "cifs";
     options = [
       "credentials=/home/aaron/.dotfiles/smb-credentials"
+      "x-systemd.automount"
+      "noauto"
+      "rw"
       "uid=1000"
       "gid=1000"
-      "iocharset=utf8"
-      "vers=3.0"
-      "x-systemd.requires=network-online.target"
-      "x-systemd.mount-timeout=30s"
     ];
   };
 
@@ -239,12 +238,11 @@
     fsType = "cifs";
     options = [
       "credentials=/home/aaron/.dotfiles/smb-credentials"
+      "x-systemd.automount"
+      "noauto"
+      "rw"
       "uid=1000"
       "gid=1000"
-      "iocharset=utf8"
-      "vers=3.0"
-      "x-systemd.requires=network-online.target"
-      "x-systemd.mount-timeout=30s"
     ];
   };
 
