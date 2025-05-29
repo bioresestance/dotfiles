@@ -131,6 +131,9 @@
     discord
     platformio
     freecad-wayland
+    dig
+    zoom-us
+    cheese
   ];
 
   programs.zsh.enable = true;
@@ -228,8 +231,6 @@
       "x-systemd.automount"
       "noauto"
       "rw"
-      "uid=1000"
-      "gid=1000"
     ];
   };
 
@@ -241,8 +242,6 @@
       "x-systemd.automount"
       "noauto"
       "rw"
-      "uid=1000"
-      "gid=1000"
     ];
   };
 
