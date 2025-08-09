@@ -40,5 +40,13 @@ in
       nssmdns4 = true;
       openFirewall = true;
     };
+
+    # Scanner support
+    hardware.sane.enable = true;
+    hardware.sane.extraBackends = [
+      pkgs.epkowa
+      pkgs.utsushi
+    ];
+    services.udev.packages = [ pkgs.utsushi ];
   };
 }

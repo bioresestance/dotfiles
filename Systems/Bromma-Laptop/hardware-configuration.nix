@@ -27,7 +27,7 @@
   boot.kernelModules = [
     "kvm-amd"
   ];
-  boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
+  # boot.extraModulePackages = [ config.boot.kernelPackages.nvidia_x11 ];
 
   fileSystems."/" = {
     device = "/dev/disk/by-uuid/d581d3ad-b02a-45bc-a97b-53e86ef3c86c";

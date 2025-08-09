@@ -5,6 +5,7 @@
 {
   config,
   pkgs,
+  lib,
   ...
 }:
 
@@ -134,6 +135,11 @@
     dig
     zoom-us
     cheese
+    xsane
+    naps2
+    insync
+    thunderbird
+    protonmail-bridge-gui
   ];
 
   programs.zsh.enable = true;
@@ -180,7 +186,7 @@
     nvidiaSettings = false;
 
     # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.beta;
+    package = config.boot.kernelPackages.nvidiaPackages.latest;
     #forceFullCompositionPipeline = true;
 
     prime = {
@@ -223,26 +229,34 @@
 
   module.apps.ThreeDPrinting.enable = true;
 
-  fileSystems."/mnt/Media" = {
-    device = "//192.168.69.57/Media";
-    fsType = "cifs";
-    options = [
-      "credentials=/home/aaron/.dotfiles/smb-credentials"
-      "x-systemd.automount"
-      "noauto"
-      "rw"
-    ];
-  };
+  # fileSystems."/mnt/Media" = {
+  #   device = "//truenas.local/Media";
+  #   fsType = "cifs";
+  #   options = [
+  #     "credentials=/home/aaron/.dotfiles/smb-credentials"
+  #     "x-systemd.automount"
+  #     "noauto"
+  #   ];
+  # };
 
-  fileSystems."/mnt/Homes" = {
-    device = "//192.168.69.57/Homes";
-    fsType = "cifs";
-    options = [
-      "credentials=/home/aaron/.dotfiles/smb-credentials"
-      "x-systemd.automount"
-      "noauto"
-      "rw"
-    ];
+  # fileSystems."/mnt/Homes" = {
+  #   device = "//192.168.69.57/Homes";
+  #   fsType = "cifs";
+  #   options = [
+  #     "credentials=/home/aaron/.dotfiles/smb-credentials"
+  #     "x-systemd.automount"
+  #     "rw"
+  #     "users"
+  #   ];
+  # };
+
+  security.wrappers = {
+    "mount.cifs" = {
+      source = "${pkgs.cifs-utils}/bin/mount.cifs";
+      setuid = true;
+      owner = "root";
+      group = "root";
+    };
   };
 
   # This value determines the NixOS release from which the default

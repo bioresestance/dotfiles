@@ -16,6 +16,8 @@ with lib;
         "docker"
         "lpadmin"
         "dialout"
+        "scanner"
+        "lp"
       ];
       shell = pkgs.zsh;
     };
