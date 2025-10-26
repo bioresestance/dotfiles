@@ -21,7 +21,7 @@ with lib;
     environment.systemPackages = with pkgs; [
       snapmaker-luban
       orca-slicer
-      bambu-studio
+      # bambu-studio
     ];
 
     nixpkgs.config.permittedInsecurePackages = [

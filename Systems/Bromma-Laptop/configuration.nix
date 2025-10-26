@@ -140,6 +140,8 @@
     insync
     thunderbird
     protonmail-bridge-gui
+    conan
+    python313Packages.pytest
   ];
 
   programs.zsh.enable = true;

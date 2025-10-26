@@ -29,7 +29,7 @@ in
       pkgs.postscript-lexmark # — Postscript drivers for Lexmark
       pkgs.samsung-unified-linux-driver # — Proprietary Samsung Drivers
       pkgs.splix # — Drivers for printers supporting SPL (Samsung Printer Language).
-      pkgs.brlaser # — Drivers for some Brother printers
+      # pkgs.brlaser # — Drivers for some Brother printers
       pkgs.brgenml1lpr # — Generic drivers for more Brother printers [1]
       pkgs.brgenml1cupswrapper # — Generic drivers for more Brother printers [1]
       pkgs.cnijfilter2 # — Drivers for some Canon Pixma devices (Proprietary driver)
