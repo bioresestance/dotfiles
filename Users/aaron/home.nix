@@ -7,6 +7,9 @@
   home.homeDirectory = "/home/aaron";
   home.stateVersion = "24.11"; # Please read the comment before changing.
 
+  # Allow unfree packages in home-manager
+  nixpkgs.config.allowUnfree = true;
+
   home.packages = with pkgs; [
     # Shell and Terminal
     eza
@@ -73,21 +76,22 @@
 
   programs.git = {
     enable = true;
-    userName = "Aaron Bromma";
-    userEmail = "aaron@bromma.dev";
-    extraConfig = {
+    settings = {
+      user = {
+        name = "Aaron Bromma";
+        email = "aaron@bromma.dev";
+      };
       init.defaultBranch = "main";
     };
   };
 
   programs.ssh = {
     enable = true;
+    enableDefaultConfig = false;
     matchBlocks = {
       # Use the 1Password SSH agent for all hosts.
       "*" = {
-        extraOptions = {
-          identityAgent = "~/.1password/agent.sock";
-        };
+        identityAgent = "~/.1password/agent.sock";
       };
     };
   };
