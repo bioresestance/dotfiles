@@ -1,11 +1,9 @@
 # Edit this configuration file to define what should be installed on
 # your system.  Help is available in the configuration.nix(5) man page
-# and in the NixOS manual (accessible by running ‘nixos-help’).
+# and in the NixOS manual (accessible by running 'nixos-help').
 
 {
-  config,
   pkgs,
-  lib,
   ...
 }:
 
@@ -13,13 +11,34 @@
   imports = [
     # Include the results of the hardware scan.
     ./hardware-configuration.nix
+
+    # Common modules
     ../../Modules/Common
-    ../../Modules/Users/aaron
+    ../../Modules/System/Utilities
+
+    # Hardware modules
+    ../../Modules/Hardware/Audio
+    ../../Modules/Hardware/Networking
+    ../../Modules/Hardware/GPU/Hybrid
+
+    # Desktop environment
+    ../../Modules/Desktop/Plasma
+
+    # Services
+    ../../Modules/Services/Virtualization
+
+    # Applications
+    ../../Modules/Applications/Development
+    ../../Modules/Applications/Gaming
+    ../../Modules/Applications/Security
     ../../Modules/Applications/3DPrinting
     ../../Modules/Applications/Tailscale
+
+    # Users
+    ../../Modules/Users/aaron
   ];
 
-  # Bootloader.
+  # Bootloader configuration
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
   boot.kernelPackages = pkgs.linuxPackages_latest;
@@ -27,210 +46,46 @@
     "amdgpu.exp_hw_support=1" # For experimental GPU support, if applicable
   ];
   boot.blacklistedKernelModules = [ "nouveau" ];
-  hardware.amdgpu.initrd.enable = true;
 
-  programs.nix-ld.enable = true;
-
-  networking.hostName = "Bromma-Laptop"; # Define your hostname.
-
-  # Enable networking
-  networking.networkmanager.enable = true;
-
-  # Enable the KDE Plasma Desktop Environment.
-  services.displayManager.sddm = {
+  # Enable hardware modules
+  module.hardware.audio.enable = true;
+  module.hardware.networking = {
     enable = true;
-    wayland.enable = true;
+    hostName = "Bromma-Laptop";
+    bluetooth.enable = true;
   };
-  services.desktopManager.plasma6.enable = true;
-
-  # Configure keymap in X11
-  services.xserver.xkb = {
-    layout = "us";
-    variant = "";
-  };
-
-  # Enable sound with pipewire.
-  security.rtkit.enable = true;
-  services.pipewire = {
+  module.hardware.gpu.hybrid = {
     enable = true;
-    alsa.enable = true;
-    alsa.support32Bit = true;
-    pulse.enable = true;
+    nvidiaBusId = "PCI:100:0:0";
+    amdgpuBusId = "PCI:101:0:0";
   };
-  services.pipewire.wireplumber.enable = true;
 
-  # Enable automatic login for the user.
-  services.displayManager.autoLogin.enable = true;
-  services.displayManager.autoLogin.user = "aaron";
-  services.displayManager.defaultSession = "plasma";
-
-  # Install firefox.
-  programs.firefox.enable = true;
-  services.fwupd.enable = true;
-
-  # List packages installed in system profile. To search, run:
-  environment.systemPackages = with pkgs; [
-    linux-firmware
-    libusb1
-    pciutils
-    vim
-    neovim
-    vscode
-    jetbrains.clion
-    kitty
-    lshw
-    google-chrome
-    pavucontrol
-    git
-    gcc14
-    clang
-    clang-tools
-    cppcheck
-    libgcc
-    gnumake
-    cmake
-    extra-cmake-modules
-    stdenv.cc.cc.lib
-    bat
-    powertop
-    htop
-    stirling-pdf
-    wget
-    just
-    # nodejs_23
-    python312
-    nixfmt-rfc-style
-    tmux
-    uv
-    nixd
-    nvtopPackages.full
-    gparted
-    ansible
-    ansible-lint
-    plexamp
-    gnome-firmware
-    libreoffice
-    kicad
-    gimp
-    tldr
-    kdePackages.okular
-    kdePackages.kate
-    mongodb-tools
-    xorg.xrandr
-    jdk21_headless
-    hugo
-    filezilla
-    simple-scan
-    sshpass
-    asusctl
-    nmap
-    cifs-utils
-    vlc
-    gtk3
-    gtk4
-    go
-    discord
-    platformio
-    freecad-wayland
-    dig
-    zoom-us
-    cheese
-    xsane
-    naps2
-    insync
-    thunderbird
-    # protonmail-bridge-gui
-    conan
-    python313Packages.pytest
-  ];
-
-  programs.zsh.enable = true;
-
-  services.asusd.enable = true;
-
-  hardware.enableAllFirmware = true;
-  services.hardware.bolt.enable = true;
-
-  # Enable OpenGL
-  hardware.graphics = {
+  # Enable desktop environment
+  module.desktop.plasma = {
     enable = true;
-    enable32Bit = true;
-  };
-
-  # Load nvidia driver for Xorg and Wayland
-  services.xserver = {
-    enable = true;
-    videoDrivers = [
-      "nvidia"
-      "amdgpu"
-    ];
-  };
-
-  hardware.nvidia = {
-
-    # Modesetting is required.
-    modesetting.enable = true;
-
-    # Nvidia power management. Experimental, and can cause sleep/suspend to fail.
-    # Enable this if you have graphical corruption issues or application crashes after waking
-    # up from sleep. This fixes it by saving the entire VRAM memory to /tmp/ instead
-    # of just the bare essentials.
-    powerManagement.enable = true;
-
-    # # Fine-grained power management. Turns off GPU when not in use.
-    # # Experimental and only works on modern Nvidia GPUs (Turing or newer).
-    powerManagement.finegrained = true;
-
-    open = true;
-
-    # Enable the Nvidia settings menu,
-    # accessible via `nvidia-settings`.
-    nvidiaSettings = false;
-
-    # Optionally, you may need to select the appropriate driver version for your specific GPU.
-    package = config.boot.kernelPackages.nvidiaPackages.latest;
-    #forceFullCompositionPipeline = true;
-
-    prime = {
-      offload = {
-        enable = true;
-        enableOffloadCmd = true;
-      };
-      #Make sure to use the correct Bus ID values for your system!
-      nvidiaBusId = "PCI:100:0:0";
-      amdgpuBusId = "PCI:101:0:0";
+    autoLogin = {
+      enable = true;
+      user = "aaron";
     };
   };
 
-  hardware.bluetooth = {
-    enable = true;
-    powerOnBoot = true;
-    settings = {
-      General = {
-        Experimental = true;
-      };
-    };
-  };
+  # Enable services
+  module.services.virtualization.enable = true;
 
-  virtualisation.docker.enable = true;
-  powerManagement.enable = true;
-
-  programs._1password.enable = true;
-  programs._1password-gui = {
+  # Enable applications
+  module.apps.development.enable = true;
+  module.apps.gaming.enable = true;
+  module.apps.security = {
     enable = true;
     polkitPolicyOwners = [ "aaron" ];
   };
-
-  programs.steam = {
-    enable = true;
-    remotePlay.openFirewall = true; # Open ports in the firewall for Steam Remote Play
-    dedicatedServer.openFirewall = true; # Open ports in the firewall for Source Dedicated Server
-    localNetworkGameTransfers.openFirewall = true; # Open ports in the firewall for Steam Local Network Game Transfers
-    gamescopeSession.enable = true;
-  };
-
   module.apps.ThreeDPrinting.enable = true;
+  module.apps.tailscale.enable = true;
 
+  # System utilities (enabled by default)
+  module.system.utilities.enable = true;
+
+  # Optional: Uncomment to enable CIFS network mounts
   # fileSystems."/mnt/Media" = {
   #   device = "//truenas.local/Media";
   #   fsType = "cifs";
@@ -252,18 +107,9 @@
   #   ];
   # };
 
-  security.wrappers = {
-    "mount.cifs" = {
-      source = "${pkgs.cifs-utils}/bin/mount.cifs";
-      setuid = true;
-      owner = "root";
-      group = "root";
-    };
-  };
-
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions
-  # on your system were taken. It‘s perfectly fine and recommended to leave
+  # on your system were taken. It's perfectly fine and recommended to leave
   # this value at the release version of the first install of this system.
   # Before changing this value read the documentation for this option
   # (e.g. man configuration.nix or on https://nixos.org/nixos/options.html).

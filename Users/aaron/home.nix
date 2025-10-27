@@ -1,4 +1,4 @@
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 {
   # Home Manager needs a bit of information about you and the paths it should
@@ -8,6 +8,7 @@
   home.stateVersion = "24.11"; # Please read the comment before changing.
 
   home.packages = with pkgs; [
+    # Shell and Terminal
     eza
     cmatrix
     cowsay
@@ -17,6 +18,32 @@
     cascadia-code
     zsh-autosuggestions
     oh-my-posh
+
+    # Desktop Applications
+    google-chrome
+    discord
+    thunderbird
+    zoom-us
+    insync
+
+    # Media and Creative
+    vlc
+    plexamp
+    gimp
+    kicad
+    freecad-wayland
+    cheese
+
+    # Office and Productivity
+    libreoffice
+    stirling-pdf
+
+    # File Management and Transfer
+    filezilla
+
+    # KDE Applications
+    kdePackages.okular
+    kdePackages.kate
   ];
 
   home.file = {
