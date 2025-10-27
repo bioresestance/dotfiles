@@ -139,7 +139,7 @@
     naps2
     insync
     thunderbird
-    protonmail-bridge-gui
+    # protonmail-bridge-gui
     conan
     python313Packages.pytest
   ];
