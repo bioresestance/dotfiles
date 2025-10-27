@@ -26,6 +26,7 @@
 
     # Services
     ../../Modules/Services/Virtualization
+    ../../Modules/Services/NetworkMounts
 
     # Applications
     ../../Modules/Applications/Development
@@ -71,6 +72,19 @@
 
   # Enable services
   module.services.virtualization.enable = true;
+  module.services.network-mounts = {
+    enable = true;
+    shares = [
+      {
+        mountPoint = "/mnt/Media";
+        device = "//192.168.69.57/Media";
+      }
+      {
+        mountPoint = "/mnt/Homes";
+        device = "//192.168.69.57/Homes";
+      }
+    ];
+  };
 
   # Enable applications
   module.apps.development.enable = true;
@@ -84,28 +98,6 @@
 
   # System utilities (enabled by default)
   module.system.utilities.enable = true;
-
-  # Optional: Uncomment to enable CIFS network mounts
-  # fileSystems."/mnt/Media" = {
-  #   device = "//truenas.local/Media";
-  #   fsType = "cifs";
-  #   options = [
-  #     "credentials=/home/aaron/.dotfiles/smb-credentials"
-  #     "x-systemd.automount"
-  #     "noauto"
-  #   ];
-  # };
-
-  # fileSystems."/mnt/Homes" = {
-  #   device = "//192.168.69.57/Homes";
-  #   fsType = "cifs";
-  #   options = [
-  #     "credentials=/home/aaron/.dotfiles/smb-credentials"
-  #     "x-systemd.automount"
-  #     "rw"
-  #     "users"
-  #   ];
-  # };
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

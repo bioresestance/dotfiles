@@ -95,15 +95,5 @@ in
 
     # Enable nix-ld for dynamic linking
     programs.nix-ld.enable = true;
-
-    # CIFS mount security wrapper
-    security.wrappers = {
-      "mount.cifs" = {
-        source = "${pkgs.cifs-utils}/bin/mount.cifs";
-        setuid = true;
-        owner = "root";
-        group = "root";
-      };
-    };
   };
 }

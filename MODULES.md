@@ -19,7 +19,8 @@ Modules/
 ├── Desktop/                  # Desktop environments
 │   └── Plasma/               # KDE Plasma 6 with SDDM
 ├── Services/                 # System services
-│   └── Virtualization/       # Docker and containerization
+│   ├── Virtualization/       # Docker and containerization
+│   └── NetworkMounts/        # CIFS/SMB network shares
 ├── Applications/             # Application modules
 │   ├── Development/          # IDEs and development tools
 │   ├── Gaming/               # Steam and gaming support
@@ -164,6 +165,46 @@ Example:
 4. **Document options**: Use clear descriptions for all options
 5. **Group related settings**: Don't create a 1-to-1 module per package unless it makes sense
 6. **Test on rebuild**: Always test with `sudo nixos-rebuild switch --flake` after changes
+
+## Network Mounts (CIFS/SMB)
+
+The NetworkMounts module provides a declarative way to configure CIFS/SMB network shares:
+
+```nix
+module.services.network-mounts = {
+  enable = true;
+  credentialsFile = "/home/aaron/.dotfiles/smb-credentials";  # Default
+  shares = [
+    {
+      mountPoint = "/mnt/Media";
+      device = "//server.local/Media";
+      # Optional: custom mount options (defaults provided)
+    }
+    {
+      mountPoint = "/mnt/Backup";
+      device = "//nas/Backup";
+      options = [
+        "x-systemd.automount"
+        "x-systemd.idle-timeout=60"
+        "rw"
+      ];
+    }
+  ];
+};
+```
+
+**Features:**
+- Automatic mount point creation
+- Systemd automounting (mounts on access, unmounts after idle timeout)
+- Proper permissions (uid=1000, gid=100, with configurable file/dir modes)
+- Credentials file support for security
+- Short timeouts to prevent boot hangs if server is unreachable
+
+**Credentials file format** (`smb-credentials`):
+```
+username=myuser
+password=mypassword
+```
 
 ## Rebuilding
 
