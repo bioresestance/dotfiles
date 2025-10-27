@@ -1,1 +1,31 @@
+# Secrets and credentials
 smb-credentials
+*.age.key
+secrets/
+
+# Build results
+result
+result-*
+
+# Direnv
+.direnv/
+
+# Backups and temporary files
+*-old.*
+*.bak
+*.tmp
+*~
+
+# OS-specific
+.DS_Store
+Thumbs.db
+
+# Editor-specific
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Debug outputs
+smb-debug-output.txt
+debug-*.log

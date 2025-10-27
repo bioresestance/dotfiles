@@ -24,6 +24,43 @@
       pkgs = nixpkgs.legacyPackages.${system};
     in
     {
+      # Formatter for 'nix fmt'
+      formatter.${system} = pkgs.nixfmt-rfc-style;
+
+      # Apps for common tasks
+      apps.${system} = {
+        format = {
+          type = "app";
+          program = toString (
+            pkgs.writeShellScript "format" ''
+              set -e
+              echo "Formatting all Nix files..."
+              find . -name "*.nix" -type f \
+                ! -path "./.git/*" \
+                ! -path "./result/*" \
+                ! -path "./result-*/*" \
+                -print0 | xargs -0 ${pkgs.nixfmt-rfc-style}/bin/nixfmt
+              echo "✓ All files formatted!"
+            ''
+          );
+        };
+        check-format = {
+          type = "app";
+          program = toString (
+            pkgs.writeShellScript "check-format" ''
+              set -e
+              echo "Checking formatting of all Nix files..."
+              find . -name "*.nix" -type f \
+                ! -path "./.git/*" \
+                ! -path "./result/*" \
+                ! -path "./result-*/*" \
+                -print0 | xargs -0 ${pkgs.nixfmt-rfc-style}/bin/nixfmt --check
+              echo "✓ All files are properly formatted!"
+            ''
+          );
+        };
+      };
+
       nixosConfigurations = {
         Bromma-Laptop = lib.nixosSystem {
           inherit system;
