@@ -21,7 +21,10 @@ with lib;
       ];
       shell = pkgs.zsh;
     };
-    services.udev.packages = with pkgs; [ platformio-core.udev ];
+    services.udev.packages = [
+      pkgs.platformio-core
+      pkgs.openocd
+    ];
   };
 
 }

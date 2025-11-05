@@ -48,6 +48,9 @@
   ];
   boot.blacklistedKernelModules = [ "nouveau" ];
 
+  #systemd configurations
+  systemd.extraConfig = "DefaultTimeoutStopSec=10s";
+
   # Enable hardware modules
   module.hardware.audio.enable = true;
   module.hardware.networking = {

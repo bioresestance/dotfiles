@@ -48,6 +48,9 @@ in
       # Code Quality and Linting
       nixfmt-rfc-style
       nixd
+
+      # Infrastructure as Code
+      ansible
       ansible-lint
 
       # Other Development Tools
