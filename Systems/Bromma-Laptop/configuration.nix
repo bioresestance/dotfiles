@@ -53,7 +53,7 @@
   systemd.settings.Manager = {
     DefaultTimeoutStopSec = "30s";
   };
-  
+
   # Improve shutdown behavior for user services
   systemd.user.extraConfig = ''
     DefaultTimeoutStopSec=15s
