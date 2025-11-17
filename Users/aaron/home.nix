@@ -1,5 +1,82 @@
 { pkgs, ... }:
 
+let
+  rofiCatppuccinTheme = builtins.toFile "rofi-catppuccin-mocha.rasi" ''
+    /* Catppuccin Mocha inspired theme */
+    * {
+      font: "Cascadia Code 12";
+      background: #1e1e2e;
+      background-alt: #181825;
+      foreground: #cdd6f4;
+      foreground-alt: #bac2de;
+      highlight: #313244;
+      accent: #89b4fa;
+      accent-alt: #b4befe;
+      urgent: #f38ba8;
+    }
+
+    window {
+      width: 40%;
+      border: 2px;
+      border-radius: 12px;
+      padding: 20px;
+      background-color: @background;
+      border-color: @accent;
+    }
+
+    mainbox {
+      background-color: transparent;
+      spacing: 12px;
+      children: [ inputbar, listview ];
+    }
+
+    inputbar {
+      background-color: transparent;
+      spacing: 8px;
+    }
+
+    prompt,
+    entry {
+      padding: 8px 12px;
+      border-radius: 8px;
+      background-color: @highlight;
+      text-color: @foreground;
+    }
+
+    listview {
+      background-color: transparent;
+      lines: 8;
+      columns: 1;
+      spacing: 6px;
+      scrollbar: false;
+    }
+
+    element {
+      padding: 8px 12px;
+      border-radius: 6px;
+    }
+
+    element normal.normal {
+      background-color: transparent;
+      text-color: @foreground;
+    }
+
+    element alternate.normal {
+      background-color: transparent;
+      text-color: @foreground-alt;
+    }
+
+    element selected.normal {
+      background-color: @accent;
+      text-color: #1e1e2e;
+    }
+
+    element urgent.normal {
+      background-color: @urgent;
+      text-color: #1e1e2e;
+    }
+  '';
+in
 {
   # Home Manager needs a bit of information about you and the paths it should
   # manage.
@@ -298,6 +375,11 @@
         "break"
       ];
     };
+  };
+
+  programs.rofi = {
+    enable = true;
+    theme = rofiCatppuccinTheme;
   };
 
   #################################################################################
