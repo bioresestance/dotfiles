@@ -44,6 +44,9 @@
     # File Management and Transfer
     filezilla
 
+  # Development
+  hugo
+
     # KDE Applications
     kdePackages.okular
     kdePackages.kate

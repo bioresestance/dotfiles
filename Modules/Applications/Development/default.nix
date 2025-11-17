@@ -17,46 +17,60 @@ in
     };
   };
 
-  config = mkIf cfg.enable {
-    environment.systemPackages = with pkgs; [
-      # IDEs and Editors
-      vscode
-      jetbrains.clion
+  config = mkIf cfg.enable (
+    let
+      globalPython = pkgs.python313.withPackages (ps: [
+        ps.proxmoxer
+        ps.pytest
+        ps."ansible-core"
+      ]);
+    in
+    {
+      environment.systemPackages = [
+        globalPython
+        pkgs.python313Packages.pipx
+      ]
+      ++ (with pkgs; [
+        # IDEs and Editors
+        vscode
+        jetbrains.clion
 
-      # Build Tools
-      gcc14
-      clang
-      clang-tools
-      cppcheck
-      libgcc
-      gnumake
-      cmake
-      extra-cmake-modules
-      stdenv.cc.cc.lib
-      just
-      conan
+        # Build Tools
+        gcc14
+        clang
+        clang-tools
+        cppcheck
+        libgcc
+        gnumake
+        cmake
+        extra-cmake-modules
+        stdenv.cc.cc.lib
+        just
+        conan
 
-      # Languages and Runtimes
-      python312
-      python313Packages.pytest
-      go
-      jdk21_headless
+        # Languages and Runtimes
+        go
+        jdk21_headless
 
-      # Version Control
-      git
+        # Version Control
+        git
 
-      # Code Quality and Linting
-      nixfmt-rfc-style
-      nixd
+        # Code Quality and Linting
+        nixfmt-rfc-style
+        nixd
+        ansible-lint
 
-      # Infrastructure as Code
-      ansible
-      ansible-lint
+        # Infrastructure as Code
 
-      # Other Development Tools
-      platformio
-      mongodb-tools
-      hugo
-    ];
-  };
+        # Other Development Tools
+        platformio
+        avrdude
+        mongodb-tools
+        hugo
+        github-copilot-cli
+        gh
+        jq
+      ]);
+    }
+  );
 }

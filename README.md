@@ -187,7 +187,7 @@ Quick reference:
 - **Hardware:** audio, networking, gpu.hybrid
 - **Desktop:** plasma
 - **Services:** virtualization, network-mounts
-- **Applications:** development, gaming, security, ThreeDPrinting, tailscale
+- **Applications:** development (VS Code, Clang, Python 3.13 bundle w/ proxmoxer & pytest, Hugo, Ansible), gaming, security, ThreeDPrinting, tailscale
 - **System:** utilities
 
 ## 🔒 Secrets Management

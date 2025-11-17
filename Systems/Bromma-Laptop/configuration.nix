@@ -20,6 +20,7 @@
     ../../Modules/Hardware/Audio
     ../../Modules/Hardware/Networking
     ../../Modules/Hardware/GPU/Hybrid
+    ../../Modules/Hardware/USB
 
     # Desktop environment
     ../../Modules/Desktop/Plasma
@@ -50,8 +51,13 @@
 
   #systemd configurations
   systemd.settings.Manager = {
-    DefaultTimeoutStopSec = "10s";
+    DefaultTimeoutStopSec = "30s";
   };
+  
+  # Improve shutdown behavior for user services
+  systemd.user.extraConfig = ''
+    DefaultTimeoutStopSec=15s
+  '';
 
   # Enable hardware modules
   module.hardware.audio.enable = true;
@@ -65,6 +71,7 @@
     nvidiaBusId = "PCI:100:0:0";
     amdgpuBusId = "PCI:101:0:0";
   };
+  module.hardware.usb.enable = true;
 
   # Enable desktop environment
   module.desktop.plasma = {

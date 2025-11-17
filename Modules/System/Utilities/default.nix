@@ -25,6 +25,7 @@ in
       pciutils
       lshw
       gparted
+      distrobox
 
       # Text Editors
       vim
