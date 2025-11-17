@@ -1,6 +1,7 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 with lib;
@@ -50,5 +51,8 @@ in
       layout = "us";
       variant = "";
     };
+    environment.systemPackages = with pkgs; [
+      kdePackages.kwallet-pam # Allows automatic unlocking of KWallet on login if wallet password matches user password.
+    ];
   };
 }

@@ -20,7 +20,6 @@
     ../../Modules/Hardware/Audio
     ../../Modules/Hardware/Networking
     ../../Modules/Hardware/GPU/Hybrid
-    ../../Modules/Hardware/USB
 
     # Desktop environment
     ../../Modules/Desktop/Plasma
@@ -47,7 +46,13 @@
   boot.kernelParams = [
     "amdgpu.exp_hw_support=1" # For experimental GPU support, if applicable
   ];
-  boot.blacklistedKernelModules = [ "nouveau" ];
+  boot.blacklistedKernelModules = [
+    "nouveau"
+    "r8152" # Realtek USB NIC driver that can wedge xHCI controllers
+    "r8152-cfgselector"
+  ];
+  # Enable Thunderbolt kernel driver
+  boot.kernelModules = [ "thunderbolt" ];
 
   #systemd configurations
   systemd.settings.Manager = {
@@ -71,7 +76,6 @@
     nvidiaBusId = "PCI:100:0:0";
     amdgpuBusId = "PCI:101:0:0";
   };
-  module.hardware.usb.enable = true;
 
   # Enable desktop environment
   module.desktop.plasma = {
@@ -97,6 +101,9 @@
       }
     ];
   };
+
+  # Ensure Thunderbolt is properly configured
+  services.hardware.bolt.enable = true;
 
   # Enable applications
   module.apps.development.enable = true;

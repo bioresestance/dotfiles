@@ -21,6 +21,7 @@
     cascadia-code
     zsh-autosuggestions
     oh-my-posh
+    usbutils
 
     # Desktop Applications
     google-chrome
