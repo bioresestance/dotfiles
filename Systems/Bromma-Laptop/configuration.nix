@@ -15,6 +15,7 @@
     # Common modules
     ../../Modules/Common
     ../../Modules/System/Utilities
+    ../../Modules/System/AutoUpdate
 
     # Hardware modules
     ../../Modules/Hardware/Audio
@@ -117,6 +118,38 @@
 
   # System utilities (enabled by default)
   module.system.utilities.enable = true;
+
+  module.system.autoUpdate = {
+    enable = true;
+    repoPath = "/home/aaron/.dotfiles";
+    repoUser = "aaron";
+    nixosTargets = [ "Bromma-Laptop" ];
+    homeManagerTargets = [
+      {
+        user = "aaron";
+        flakeAttr = "aaron";
+      }
+    ];
+    notification = {
+      command = "${pkgs.libnotify}/bin/notify-send";
+      appName = "Nix Auto Update";
+      icon = "preferences-system-updates";
+      timeoutMs = 10000;
+      extraArgs = [ "--hint=int:transient:1" ];
+    };
+    git = {
+      commitMessagePrefix = "Auto-update";
+      enablePush = true;
+      remote = "origin";
+      branch = "main";
+    };
+    timer = {
+      onCalendar = "daily";
+      onBootSec = "5min";
+      randomizedDelaySec = "30min";
+      persistent = true;
+    };
+  };
 
   # This value determines the NixOS release from which the default
   # settings for stateful data, like file locations and database versions

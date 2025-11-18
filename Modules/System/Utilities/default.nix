@@ -26,6 +26,7 @@ in
       lshw
       gparted
       distrobox
+      libnotify
 
       # Text Editors
       vim

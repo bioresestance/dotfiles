@@ -140,6 +140,19 @@ nixfmt path/to/file.nix
 ./scripts/format.sh
 ```
 
+## 🔄 Automated Flake Updates
+
+- Enable `module.system.autoUpdate` in your system configuration to automatically run `nix flake update`, `nixos-rebuild switch`, and the configured home-manager switches once per day (first boot of the day, thanks to `Persistent=true`).
+- The module drops a script at `nix-flake-auto-update.service`/`.timer`, sends desktop notifications via `notify-send` by default, and rolls back `flake.lock` if a rebuild fails.
+- Git commits + pushes are handled automatically when the lockfile changes; push failures are reported in the notification but do not abort the update.
+- Key knobs: `repoPath`, `repoUser` (run flake/git as the repo owner), `nixosTargets`, `homeManagerTargets`, `notification.command/icon`, `git.remote/branch`, and `timer` cadence. See `MODULES.md` for a complete example.
+- Check status/logs with:
+
+```bash
+systemctl status nix-flake-auto-update.service
+journalctl -u nix-flake-auto-update.service -n 200
+```
+
 ## 🏗️ Adding a New System
 
 1. **Create system directory:**
@@ -188,7 +201,7 @@ Quick reference:
 - **Desktop:** plasma
 - **Services:** virtualization, network-mounts
 - **Applications:** development (VS Code, Clang, Python 3.13 bundle w/ proxmoxer & pytest, Hugo, Ansible), gaming, security, ThreeDPrinting, tailscale
-- **System:** utilities
+- **System:** utilities, autoUpdate (automated flake updater)
 
 ## 🔒 Secrets Management
 

@@ -61,6 +61,9 @@ module.services.network-mounts.enable = true;
 module.apps.development.enable = true;
 module.apps.gaming.enable = true;
 module.apps.security.enable = true;
+
+# System automation
+module.system.autoUpdate.enable = true;  # configure repoPath + targets in configuration.nix
 ```
 
 ## 🐛 Troubleshooting

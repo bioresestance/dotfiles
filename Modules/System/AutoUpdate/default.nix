@@ -29,7 +29,8 @@ let
       pkgs.gnugrep
       pkgs.gnused
       pkgs.nix
-      pkgs.utillinux
+      pkgs.util-linux
+      pkgs.sudo
       cfg.homeManagerPackage
     ];
     text = ''
@@ -88,6 +89,15 @@ let
       nix_targets="$AUTOUPDATE_NIX_TARGETS"
       home_targets="$AUTOUPDATE_HOME_TARGETS"
       hm_bin="$AUTOUPDATE_HOME_MANAGER"
+      repo_user="$AUTOUPDATE_REPO_USER"
+
+      run_repo_cmd() {
+        if [[ -z "$repo_user" || "$repo_user" == "root" ]]; then
+          "$@"
+        else
+          sudo -u "$repo_user" -H -- "$@"
+        fi
+      }
 
       if [[ -z "$repo" ]]; then
         echo "AUTOUPDATE_REPO not set" >&2
@@ -153,7 +163,7 @@ let
       }
 
       log "Running nix flake update"
-      if ! nix flake update; then
+      if ! run_repo_cmd nix flake update; then
         failure "flake update failed"
       fi
 
@@ -178,15 +188,15 @@ let
       fi
 
       log "Preparing git commit"
-      if ! git add flake.lock; then
+      if ! run_repo_cmd git add flake.lock; then
         failure "git add flake.lock failed"
       fi
 
-      if git diff --cached --quiet -- flake.lock; then
+      if run_repo_cmd git diff --cached --quiet -- flake.lock; then
         log "No lockfile changes detected"
       else
         commit_message="$AUTOUPDATE_GIT_MESSAGE $(date --iso-8601=seconds)"
-        if ! git commit -m "$commit_message"; then
+        if ! run_repo_cmd git commit -m "$commit_message"; then
           failure "git commit failed"
         fi
         log "Committed lockfile update"
@@ -197,10 +207,10 @@ let
         remote="$AUTOUPDATE_GIT_REMOTE"
         branch="$AUTOUPDATE_GIT_BRANCH"
         if [[ -z "$branch" ]]; then
-          branch="$(git rev-parse --abbrev-ref HEAD)"
+          branch="$(run_repo_cmd git rev-parse --abbrev-ref HEAD)"
         fi
         log "Pushing to $remote $branch"
-        if git push "$remote" "$branch"; then
+        if run_repo_cmd git push "$remote" "$branch"; then
           push_result="succeeded"
         else
           push_result="failed"
@@ -222,6 +232,13 @@ in
       default = null;
       example = "/home/aaron/.dotfiles";
       description = "Absolute path to the flake repository to update.";
+    };
+
+    repoUser = mkOption {
+      type = types.nullOr types.str;
+      default = null;
+      example = "aaron";
+      description = "User account that owns the repo; nix flake update and git operations run as this user.";
     };
 
     nixosTargets = mkOption {
@@ -351,6 +368,7 @@ in
 
       environment = {
         AUTOUPDATE_REPO = cfg.repoPath;
+        AUTOUPDATE_REPO_USER = if cfg.repoUser == null then "" else cfg.repoUser;
         AUTOUPDATE_NIX_TARGETS = concatStringsSep " " cfg.nixosTargets;
         AUTOUPDATE_HOME_TARGETS = concatStringsSep " " (
           map (target: "${target.user}:${target.flakeAttr}") cfg.homeManagerTargets

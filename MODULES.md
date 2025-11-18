@@ -9,7 +9,8 @@ Modules/
 ├── Common/                    # Base configuration (timezone, locale, flakes)
 │   └── Printing/             # CUPS printing support
 ├── System/                   # System-level configuration
-│   └── Utilities/            # Core system utilities and tools
+│   ├── Utilities/            # Core system utilities and tools
+│   └── AutoUpdate/           # Scheduled flake updates & rebuilds
 ├── Hardware/                 # Hardware-specific modules
 │   ├── Audio/                # PipeWire audio configuration
 │   ├── Networking/           # NetworkManager and Bluetooth
@@ -77,6 +78,37 @@ Application bundles and software
 
 ### `module.system.*`
 Core system utilities and configuration
+
+#### `module.system.autoUpdate`
+Automates daily flake updates, rebuilds, and git pushes. Key options:
+
+- `repoPath` (required): absolute path to the flake checkout.
+- `repoUser`: user account that owns the repo; `nix flake update` + git steps run as this user to satisfy Nix's ownership checks.
+- `nixosTargets`: list of nixosConfiguration attributes to rebuild (defaults to the current `networking.hostName`).
+- `homeManagerTargets`: list of `{ user, flakeAttr }` pairs for home-manager rebuilds.
+- `notification.*`: command, icon, timeout, and enable switch (defaults to `notify-send`, works well with KDE/Plasma but can be customized for other DEs).
+- `git.*`: commit message prefix, remote, branch, and push toggle. Push failures just show up in the notification and do not abort the update.
+- `timer.*`: systemd timer cadence (`onCalendar`, `onBootSec`, optional `randomizedDelaySec`, `persistent`).
+
+Example:
+
+```nix
+module.system.autoUpdate = {
+  enable = true;
+  repoPath = "/home/aaron/.dotfiles";
+  nixosTargets = [ "Bromma-Laptop" ];
+  homeManagerTargets = [{ user = "aaron"; flakeAttr = "aaron"; }];
+  notification.command = "${pkgs.libnotify}/bin/notify-send";
+  git.branch = "main";
+  timer = {
+    onCalendar = "daily";
+    onBootSec = "5min";
+    randomizedDelaySec = "30min";
+  };
+};
+```
+
+This creates `nix-flake-auto-update.service` + `.timer`, which runs once per day (or on the first boot that day), posts start/success/failure notifications, rolls back `flake.lock` if a switch fails, and optionally pushes the updated lockfile.
 
 ## Usage in System Configuration
 
