@@ -88,6 +88,8 @@ Automates daily flake updates, rebuilds, and git pushes. Key options:
 - `homeManagerTargets`: list of `{ user, flakeAttr }` pairs for home-manager rebuilds.
 - `notification.*`: command, icon, timeout, and enable switch (defaults to `notify-send`, works well with KDE/Plasma but can be customized for other DEs).
 - `git.*`: commit message prefix, remote, branch, and push toggle. Push failures just show up in the notification and do not abort the update.
+- `git.safeDirectories`: extra repositories to mark as Git safe when the service runs as root (defaults to the configured repo path).
+- `git.allowDirty`: set to true if you really want updates to continue even when the flake checkout has uncommitted changes (defaults to false, so the run aborts early with a notification instead of trampling your work in progress).
 - `timer.*`: systemd timer cadence (`onCalendar`, `onBootSec`, optional `randomizedDelaySec`, `persistent`).
 
 Example:

@@ -8,18 +8,11 @@ with lib;
 let
   cfg = config.module.system.autoUpdate;
 
-  homeTargetType = types.submodule {
-    options = {
-      user = mkOption {
-        type = types.str;
-        description = "System user that owns the home-manager profile.";
-      };
-      flakeAttr = mkOption {
-        type = types.str;
-        description = "Flake output under homeConfigurations to rebuild.";
-      };
-    };
-  };
+  safeDirectories =
+    if cfg.git.safeDirectories != [ ] then
+      cfg.git.safeDirectories
+    else
+      optional (cfg.repoPath != null) cfg.repoPath;
 
   autoUpdateScript = pkgs.writeShellApplication {
     name = "nix-flake-auto-update";
@@ -90,6 +83,12 @@ let
       home_targets="$AUTOUPDATE_HOME_TARGETS"
       hm_bin="$AUTOUPDATE_HOME_MANAGER"
       repo_user="$AUTOUPDATE_REPO_USER"
+      nixos_rebuild="$AUTOUPDATE_NIXOS_REBUILD"
+      allow_dirty="$AUTOUPDATE_GIT_ALLOW_DIRTY"
+
+      if [[ -z "$nixos_rebuild" ]]; then
+        nixos_rebuild="nixos-rebuild"
+      fi
 
       run_repo_cmd() {
         if [[ -z "$repo_user" || "$repo_user" == "root" ]]; then
@@ -110,6 +109,12 @@ let
       fi
 
       cd "$repo"
+
+      if [[ "$allow_dirty" != "1" ]]; then
+        if [[ -n "$(run_repo_cmd git status --porcelain --untracked-files=all)" ]]; then
+          failure "git working tree is dirty"
+        fi
+      fi
 
       lock_backup=""
       cleanup() {
@@ -170,7 +175,7 @@ let
       if [[ -n "$nix_targets" ]]; then
         for target in $nix_targets; do
           log "Switching NixOS target $target"
-          if ! nixos-rebuild switch --flake "$repo#$target"; then
+          if ! "$nixos_rebuild" switch --flake "$repo#$target"; then
             failure "nixos-rebuild failed for $target"
           fi
         done
@@ -221,6 +226,19 @@ let
       log "$summary"
       notify "Nix auto update" "Update succeeded" "normal" "$summary"
     '';
+  };
+
+  homeTargetType = types.submodule {
+    options = {
+      user = mkOption {
+        type = types.str;
+        description = "System user that owns the home-manager profile.";
+      };
+      flakeAttr = mkOption {
+        type = types.str;
+        description = "Flake output under homeConfigurations to rebuild.";
+      };
+    };
   };
 in
 {
@@ -321,6 +339,18 @@ in
         default = null;
         description = "Branch to push to (falls back to current branch when null).";
       };
+
+      safeDirectories = mkOption {
+        type = types.listOf types.str;
+        default = [ ];
+        description = "List of repository paths to mark as Git safe.directory for root-run commands.";
+      };
+
+      allowDirty = mkOption {
+        type = types.bool;
+        default = false;
+        description = "Allow auto-update to proceed even if the Git working tree has uncommitted changes.";
+      };
     };
 
     timer = {
@@ -358,6 +388,11 @@ in
       }
     ];
 
+    programs.git = mkIf (safeDirectories != [ ]) {
+      enable = mkDefault true;
+      config.safe.directory = mkBefore safeDirectories;
+    };
+
     systemd.services.nix-flake-auto-update = {
       description = "Automatic flake update and rebuild";
       serviceConfig = {
@@ -374,6 +409,7 @@ in
           map (target: "${target.user}:${target.flakeAttr}") cfg.homeManagerTargets
         );
         AUTOUPDATE_HOME_MANAGER = "${cfg.homeManagerPackage}/bin/home-manager";
+        AUTOUPDATE_NIXOS_REBUILD = "${config.system.build.nixos-rebuild}/bin/nixos-rebuild";
         AUTOUPDATE_NOTIFY = if cfg.notification.enable then "1" else "0";
         AUTOUPDATE_NOTIFY_COMMAND = cfg.notification.command;
         AUTOUPDATE_NOTIFY_APP = cfg.notification.appName;
@@ -384,6 +420,7 @@ in
         AUTOUPDATE_GIT_PUSH = if cfg.git.enablePush then "1" else "0";
         AUTOUPDATE_GIT_REMOTE = cfg.git.remote;
         AUTOUPDATE_GIT_BRANCH = if cfg.git.branch == null then "" else cfg.git.branch;
+        AUTOUPDATE_GIT_ALLOW_DIRTY = if cfg.git.allowDirty then "1" else "0";
       };
     };
 

@@ -83,6 +83,18 @@ in
     # Enable firmware updates
     services.fwupd.enable = true;
 
+    systemd.services.fwupd-refresh = {
+      wants = [
+        "fwupd.service"
+        "network-online.target"
+      ];
+      after = [
+        "fwupd.service"
+        "network-online.target"
+      ];
+      requires = [ "fwupd.service" ];
+    };
+
     # Enable ASUS hardware control
     services.asusd.enable = true;
 
