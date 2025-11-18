@@ -87,6 +87,14 @@ in
   # Allow unfree packages in home-manager
   nixpkgs.config.allowUnfree = true;
 
+  nixpkgs.overlays = [
+    (final: prev: {
+      celeste = prev.celeste.overrideAttrs (old: {
+        patches = (old.patches or [ ]) ++ [ ./patches/celeste-let-chains.patch ];
+      });
+    })
+  ];
+
   home.packages = with pkgs; [
     # Shell and Terminal
     eza
@@ -105,7 +113,7 @@ in
     discord
     thunderbird
     zoom-us
-    insync
+    celeste
 
     # Media and Creative
     vlc

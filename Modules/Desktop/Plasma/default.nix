@@ -52,7 +52,7 @@ in
       variant = "";
     };
     environment.systemPackages = with pkgs; [
-      kdePackages.kwallet-pam # Allows automatic unlocking of KWallet on login if wallet password matches user password.
+      kdePackages.kwallet-pam # Allows automatic unlocking of KWallet when wallet password matches user password.
     ];
   };
 }

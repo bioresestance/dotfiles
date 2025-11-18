@@ -1,0 +1,201 @@
+--- a/src/launch.rs
++++ b/src/launch.rs
+@@ -153,14 +153,14 @@
+ pub fn launch(app: &Application, background: bool) {
+     // Create the configuration directory if it doesn't exist.
+     let config_path = util::get_config_dir();
+-    if !config_path.exists()
+-        && let Err(err) = fs::create_dir_all(&config_path)
+-    {
+-        gtk_util::show_error(
+-            &tr::tr!("Unable to create Celeste's config directory [{}].", err),
+-            None,
+-        );
+-        return;
++    if !config_path.exists() {
++        if let Err(err) = fs::create_dir_all(&config_path) {
++            gtk_util::show_error(
++                &tr::tr!("Unable to create Celeste's config directory [{}].", err),
++                None,
++            );
++            return;
++        }
+     }
+ 
+     // Create the database file if it doesn't exist.
+@@ -1890,14 +1890,14 @@
+                                 file_type.is_dir() && remote_item.as_ref().unwrap().is_dir;
+ 
+                             if !same_type {
+-                                if file_type.is_dir()
+-                                    && let Err(err) = fs::remove_dir_all(item.path())
+-                                {
+-                                    add_error(SyncError::General(
+-                                        local_path.clone(),
+-                                        err.to_string(),
+-                                    ));
+-                                    return Err(());
++                                if file_type.is_dir() {
++                                    if let Err(err) = fs::remove_dir_all(item.path()) {
++                                        add_error(SyncError::General(
++                                            local_path.clone(),
++                                            err.to_string(),
++                                        ));
++                                        return Err(());
++                                    }
+                                 } else if let Err(err) = fs::remove_file(item.path()) {
+                                     add_error(SyncError::General(
+                                         local_path.clone(),
+@@ -1959,25 +1959,29 @@
+                                 util::await_future(active_model.update(db)).unwrap();
+                             };
+ 
++                            let remote_is_newer =
++                                remote_utc_timestamp.is_some_and(|timestamp| {
++                                    timestamp > db_model.last_remote_timestamp as i64
++                                });
++
+                             // Both items are more current than at the last transaction - we need to
+                             // let the user decide which to keep.
+                             // Since `db_model.last_sync_timestamp` is an `i32`, we should be able
+                             // to safely convert it to an `i64` and `u64`.
+                             if local_utc_timestamp > db_model.last_local_timestamp as u64
+-                                && let Some(remote_timestamp) = remote_utc_timestamp
+-                                && remote_timestamp > db_model.last_remote_timestamp as i64
++                                && remote_is_newer
+                             {
+                                 // Only add the error if one of the items is not a directory -
+                                 // there's no point in saying both directories are more current, and
+                                 // it's probably because one of the items in the directory got
+                                 // updated anyway.
+-                                if let Some(r_item) = remote_item
+-                                    && (!item.path().is_dir() || !r_item.is_dir)
+-                                {
+-                                    add_error(SyncError::BothMoreCurrent(
+-                                        local_path.clone(),
+-                                        remote_path.clone(),
+-                                    ));
++                                if let Some(r_item) = remote_item.as_ref() {
++                                    if !item.path().is_dir() || !r_item.is_dir {
++                                        add_error(SyncError::BothMoreCurrent(
++                                            local_path.clone(),
++                                            remote_path.clone(),
++                                        ));
++                                    }
+                                 }
+                             // The local item is more recent.
+                             } else if local_utc_timestamp > db_model.last_local_timestamp as u64 {
+@@ -1991,12 +1995,10 @@
+                                     continue;
+                                 }
+                             // The remote item is more recent.
+-                            } else if let Some(remote_timestamp) = remote_utc_timestamp
+-                                && remote_timestamp > db_model.last_remote_timestamp as i64
+-                            {
++                            } else if remote_is_newer {
+                                 if pull_remote_to_local().is_err() {
+                                     continue;
+-                                } else {
++                                } else if let Some(remote_timestamp) = remote_utc_timestamp {
+                                     update_db_item(
+                                         get_local_file_timestamp().try_into().unwrap(),
+                                         remote_timestamp.try_into().unwrap(),
+@@ -2030,8 +2032,9 @@
+                             // Both the local and remote item remain unchanged -
+                             // do nothing.
+                             } else if local_utc_timestamp == db_model.last_local_timestamp as u64
+-                                && let Some(remote_timestamp) = remote_utc_timestamp
+-                                && remote_timestamp == db_model.last_remote_timestamp as i64
++                                && remote_utc_timestamp.is_some_and(|remote_timestamp| {
++                                    remote_timestamp == db_model.last_remote_timestamp as i64
++                                })
+                             {
+                                 continue;
+                             // Every possible scenario should have been covered
+@@ -2344,14 +2347,14 @@
+                             }
+ 
+                             if item.is_dir {
+-                                if !local_path.exists()
+-                                    && let Err(err) = fs::create_dir(local_path)
+-                                {
+-                                    add_error(SyncError::General(
+-                                        local_path_string.clone(),
+-                                        err.to_string(),
+-                                    ));
+-                                    return Err(());
++                                if !local_path.exists() {
++                                    if let Err(err) = fs::create_dir(local_path) {
++                                        add_error(SyncError::General(
++                                            local_path_string.clone(),
++                                            err.to_string(),
++                                        ));
++                                        return Err(());
++                                    }
+                                 }
+ 
+                                 sync_remote_directory(
+@@ -2414,9 +2417,9 @@
+                             };
+ 
+                             // Both items are more recent.
+-                            if let Some(l_timestamp) = local_timestamp
+-                                && l_timestamp > db_model.last_local_timestamp as u64
+-                                && remote_timestamp > db_model.last_remote_timestamp as i64
++                            if local_timestamp.is_some_and(|l_timestamp| {
++                                l_timestamp > db_model.last_local_timestamp as u64
++                            }) && remote_timestamp > db_model.last_remote_timestamp as i64
+                             {
+                                 // Only add the error if one of the items is not a directory -
+                                 // there's no point in saying both directories are more current, and
+@@ -2430,9 +2433,9 @@
+                                 }
+                                 continue;
+                             // The local item is more recent.
+-                            } else if let Some(l_timestamp) = local_timestamp
+-                                && l_timestamp > db_model.last_local_timestamp as u64
+-                            {
++                            } else if local_timestamp.is_some_and(|l_timestamp| {
++                                l_timestamp > db_model.last_local_timestamp as u64
++                            }) {
+                                 if let Ok(rclone_item) = push_local_to_remote() {
+                                     update_db_item(
+                                         get_local_file_timestamp().unwrap().try_into().unwrap(),
+@@ -2477,9 +2480,9 @@
+ 
+                             // Both the local and remote item remain unchanged -
+                             // do nothing.
+-                            } else if let Some(l_timestamp) = local_timestamp
+-                                && l_timestamp == db_model.last_local_timestamp as u64
+-                                && remote_timestamp == db_model.last_remote_timestamp as i64
++                            } else if local_timestamp.is_some_and(|l_timestamp| {
++                                l_timestamp == db_model.last_local_timestamp as u64
++                            }) && remote_timestamp == db_model.last_remote_timestamp as i64
+                             {
+                                 continue;
+ 
+--- a/src/migrations/m20230220_215840_remote_sync_items_fix.rs
++++ b/src/migrations/m20230220_215840_remote_sync_items_fix.rs
+@@ -19,14 +19,14 @@
+         .await?;
+ 
+         for item in sync_items {
+-            if let Some(item_str) = item["remote_path"].as_str()
+-                && item_str.starts_with('/')
+-            {
+-                db.execute(Statement::from_string(
+-                    backend,
+-                    format!(r#"DELETE FROM sync_items where remote_path = "{item_str}""#),
+-                ))
+-                .await?;
++            if let Some(item_str) = item["remote_path"].as_str() {
++                if item_str.starts_with('/') {
++                    db.execute(Statement::from_string(
++                        backend,
++                        format!(r#"DELETE FROM sync_items where remote_path = "{item_str}""#),
++                    ))
++                    .await?;
++                }
+             }
+         }
+ 
