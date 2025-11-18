@@ -14,6 +14,8 @@ let
     else
       optional (cfg.repoPath != null) cfg.repoPath;
 
+  notifyUser = if cfg.notification.user != null then cfg.notification.user else cfg.repoUser;
+
   autoUpdateScript = pkgs.writeShellApplication {
     name = "nix-flake-auto-update";
     runtimeInputs = [
@@ -43,7 +45,26 @@ let
           return
         fi
 
-        local cmd=("$AUTOUPDATE_NOTIFY_COMMAND")
+        local base_cmd=("$AUTOUPDATE_NOTIFY_COMMAND")
+        local cmd=("''${base_cmd[@]}")
+        local notify_user="$AUTOUPDATE_NOTIFY_USER"
+
+        if [[ -n "$notify_user" ]]; then
+          local notify_uid=""
+          if notify_uid="$(id -u "$notify_user" 2>/dev/null)"; then
+            local runtime_dir="/run/user/$notify_uid"
+            local bus_path="$runtime_dir/bus"
+            if [[ -S "$bus_path" ]]; then
+              cmd=(
+                sudo -u "$notify_user"
+                env
+                XDG_RUNTIME_DIR="$runtime_dir"
+                DBUS_SESSION_BUS_ADDRESS="unix:path=$bus_path"
+                "''${base_cmd[@]}"
+              )
+            fi
+          fi
+        fi
 
         local full_body="$body"
         if [[ -n "$extra_body" ]]; then
@@ -284,6 +305,12 @@ in
         description = "Enable desktop notifications via notify-send (or custom command).";
       };
 
+      user = mkOption {
+        type = types.nullOr types.str;
+        default = null;
+        description = "User account whose desktop session should receive notifications (falls back to repoUser when unset).";
+      };
+
       command = mkOption {
         type = types.str;
         default = "${pkgs.libnotify}/bin/notify-send";
@@ -411,6 +438,7 @@ in
         AUTOUPDATE_HOME_MANAGER = "${cfg.homeManagerPackage}/bin/home-manager";
         AUTOUPDATE_NIXOS_REBUILD = "${config.system.build.nixos-rebuild}/bin/nixos-rebuild";
         AUTOUPDATE_NOTIFY = if cfg.notification.enable then "1" else "0";
+        AUTOUPDATE_NOTIFY_USER = if notifyUser == null then "" else notifyUser;
         AUTOUPDATE_NOTIFY_COMMAND = cfg.notification.command;
         AUTOUPDATE_NOTIFY_APP = cfg.notification.appName;
         AUTOUPDATE_NOTIFY_ICON = if cfg.notification.icon == null then "" else cfg.notification.icon;

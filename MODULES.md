@@ -86,7 +86,7 @@ Automates daily flake updates, rebuilds, and git pushes. Key options:
 - `repoUser`: user account that owns the repo; `nix flake update` + git steps run as this user to satisfy Nix's ownership checks.
 - `nixosTargets`: list of nixosConfiguration attributes to rebuild (defaults to the current `networking.hostName`).
 - `homeManagerTargets`: list of `{ user, flakeAttr }` pairs for home-manager rebuilds.
-- `notification.*`: command, icon, timeout, and enable switch (defaults to `notify-send`, works well with KDE/Plasma but can be customized for other DEs).
+- `notification.*`: `user` (whose DBus session receives the notification, defaults to the repo user), command, icon, timeout, and enable switch (defaults to `notify-send`, works well with KDE/Plasma but can be customized for other DEs).
 - `git.*`: commit message prefix, remote, branch, and push toggle. Push failures just show up in the notification and do not abort the update.
 - `git.safeDirectories`: extra repositories to mark as Git safe when the service runs as root (defaults to the configured repo path).
 - `git.allowDirty`: set to true if you really want updates to continue even when the flake checkout has uncommitted changes (defaults to false, so the run aborts early with a notification instead of trampling your work in progress).
@@ -100,7 +100,10 @@ module.system.autoUpdate = {
   repoPath = "/home/aaron/.dotfiles";
   nixosTargets = [ "Bromma-Laptop" ];
   homeManagerTargets = [{ user = "aaron"; flakeAttr = "aaron"; }];
-  notification.command = "${pkgs.libnotify}/bin/notify-send";
+  notification = {
+    user = "aaron";
+    command = "${pkgs.libnotify}/bin/notify-send";
+  };
   git.branch = "main";
   timer = {
     onCalendar = "daily";
