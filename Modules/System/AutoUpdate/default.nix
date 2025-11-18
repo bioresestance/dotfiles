@@ -23,6 +23,7 @@ let
       pkgs.git
       pkgs.gnugrep
       pkgs.gnused
+      pkgs.openssh
       pkgs.nix
       pkgs.util-linux
       pkgs.sudo
