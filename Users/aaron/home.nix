@@ -114,6 +114,7 @@ in
     thunderbird
     zoom-us
     celeste
+    moonlight-qt
 
     # Media and Creative
     vlc
