@@ -107,6 +107,7 @@ in
     zsh-autosuggestions
     oh-my-posh
     usbutils
+    wakeonlan
 
     # Desktop Applications
     google-chrome
