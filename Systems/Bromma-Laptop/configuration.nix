@@ -106,6 +106,12 @@
   # Ensure Thunderbolt is properly configured
   services.hardware.bolt.enable = true;
 
+  # Keep the Plugable dock's Realtek RTL8156 NIC from binding to the generic
+  # CDC NCM stack (which currently wedges the laptop's xHCI controller).
+  services.udev.extraRules = ''
+    SUBSYSTEM=="usb", ATTR{idVendor}=="0bda", ATTR{idProduct}=="8156", ATTR{authorized}="0"
+  '';
+
   # Enable applications
   module.apps.development.enable = true;
   module.apps.gaming.enable = true;
