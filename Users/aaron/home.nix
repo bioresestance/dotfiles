@@ -111,6 +111,7 @@ in
 
     # Desktop Applications
     google-chrome
+    vivaldi
     discord
     thunderbird
     zoom-us
