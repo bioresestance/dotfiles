@@ -46,6 +46,7 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelParams = [
     "amdgpu.exp_hw_support=1" # For experimental GPU support, if applicable
+    "usbcore.authorized_default=0" # Start USB devices in blocked state so udev can selectively re-authorize
   ];
   boot.blacklistedKernelModules = [
     "nouveau"
@@ -107,9 +108,16 @@
   services.hardware.bolt.enable = true;
 
   # Keep the Plugable dock's Realtek RTL8156 NIC from binding to the generic
-  # CDC NCM stack (which currently wedges the laptop's xHCI controller).
+  # CDC NCM stack (which currently wedges the laptop's xHCI controller). Every
+  # USB device now starts unauthorized (via usbcore.authorized_default=0) and
+  # this rule re-enables everything except the problematic NIC.
   services.udev.extraRules = ''
-    SUBSYSTEM=="usb", ATTR{idVendor}=="0bda", ATTR{idProduct}=="8156", ATTR{authorized}="0"
+    SUBSYSTEM=="usb", ATTR{idVendor}=="0bda", ATTR{idProduct}=="8156", GOTO="rtl8156_block"
+    SUBSYSTEM=="usb", TEST=="authorized", ATTR{authorized}="1"
+    GOTO="rtl8156_end"
+    LABEL="rtl8156_block"
+    SUBSYSTEM=="usb", TEST=="authorized", ATTR{authorized}="0"
+    LABEL="rtl8156_end"
   '';
 
   # Enable applications
