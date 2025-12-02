@@ -7,6 +7,28 @@
   ...
 }:
 
+let
+  dockEthernetProfile = pkgs.writeText "dock-ethernet.nmconnection" ''
+    [connection]
+    id=Dock Ethernet
+    uuid=21917c9e-63aa-4a07-9a37-79fba399a097
+    type=ethernet
+    autoconnect=true
+    permissions=
+
+    [ethernet]
+    mac-address=8C:AE:4C:BE:04:75
+
+    [ipv4]
+    method=auto
+
+    [ipv6]
+    addr-gen-mode=eui64
+    method=auto
+
+    [proxy]
+  '';
+in
 {
   imports = [
     # Include the results of the hardware scan.
@@ -46,12 +68,9 @@
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelParams = [
     "amdgpu.exp_hw_support=1" # For experimental GPU support, if applicable
-    "usbcore.authorized_default=0" # Start USB devices in blocked state so udev can selectively re-authorize
   ];
   boot.blacklistedKernelModules = [
     "nouveau"
-    "r8152" # Realtek USB NIC driver that can wedge xHCI controllers
-    "r8152-cfgselector"
   ];
   # Enable Thunderbolt kernel driver
   boot.kernelModules = [ "thunderbolt" ];
@@ -107,18 +126,29 @@
   # Ensure Thunderbolt is properly configured
   services.hardware.bolt.enable = true;
 
-  # Keep the Plugable dock's Realtek RTL8156 NIC from binding to the generic
-  # CDC NCM stack (which currently wedges the laptop's xHCI controller). Every
-  # USB device now starts unauthorized (via usbcore.authorized_default=0) and
-  # this rule re-enables everything except the problematic NIC.
+  # Force Realtek USB NICs (including RTL8156) into the vendor-specific
+  # configuration so the r8152 driver binds instead of the generic CDC stack.
   services.udev.extraRules = ''
-    SUBSYSTEM=="usb", ATTR{idVendor}=="0bda", ATTR{idProduct}=="8156", GOTO="rtl8156_block"
-    SUBSYSTEM=="usb", TEST=="authorized", ATTR{authorized}="1"
-    GOTO="rtl8156_end"
-    LABEL="rtl8156_block"
-    SUBSYSTEM=="usb", TEST=="authorized", ATTR{authorized}="0"
-    LABEL="rtl8156_end"
+    ACTION!="add", GOTO="usb_realtek_net_end"
+    SUBSYSTEM!="usb", GOTO="usb_realtek_net_end"
+    ENV{DEVTYPE}!="usb_device", GOTO="usb_realtek_net_end"
+
+    ENV{REALTEK_MODE1}="1"
+    ENV{REALTEK_MODE2}="3"
+
+    # Realtek OEM adapters
+    ATTR{idVendor}=="0bda", ATTR{idProduct}=="815[2,3,5,6]", ATTR{bConfigurationValue}!="$env{REALTEK_MODE1}", ATTR{bConfigurationValue}="$env{REALTEK_MODE1}"
+    ATTR{idVendor}=="0bda", ATTR{idProduct}=="8053", ATTR{bcdDevice}=="e???", ATTR{bConfigurationValue}!="$env{REALTEK_MODE2}", ATTR{bConfigurationValue}="$env{REALTEK_MODE2}"
+
+    LABEL="usb_realtek_net_end"
   '';
+
+  # Provide a persistent NetworkManager profile so the dock NIC keeps
+  # autoconnecting even if the kernel renames the interface after USB resets.
+  environment.etc."NetworkManager/system-connections/dock-ethernet.nmconnection" = {
+    source = dockEthernetProfile;
+    mode = "0600";
+  };
 
   # Enable applications
   module.apps.development.enable = true;
