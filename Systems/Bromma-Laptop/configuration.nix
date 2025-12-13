@@ -91,6 +91,7 @@ in
     enable = true;
     hostName = "Bromma-Laptop";
     bluetooth.enable = true;
+    mt7925FirmwareUpdate.enable = true; # Use latest upstream mt7925 WiFi firmware
   };
   module.hardware.gpu.hybrid = {
     enable = true;

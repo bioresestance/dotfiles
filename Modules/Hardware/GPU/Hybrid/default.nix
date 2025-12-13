@@ -58,8 +58,8 @@ in
       # Works on Turing or newer GPUs
       powerManagement.finegrained = true;
 
-      # Use open source kernel module
-      open = true;
+      # Use proprietary kernel module (better kernel compatibility than open)
+      open = false;
 
       # Disable Nvidia settings menu
       nvidiaSettings = false;
