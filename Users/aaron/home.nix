@@ -117,6 +117,7 @@ in
     zoom-us
     celeste
     moonlight-qt
+    obsidian
 
     # Media and Creative
     vlc
@@ -246,6 +247,12 @@ in
     enable = true;
     useTheme = "catppuccin";
     enableZshIntegration = true;
+  };
+
+  programs.direnv = {
+    enable = true;
+    enableZshIntegration = true;
+    nix-direnv.enable = true;
   };
 
   programs.fastfetch = {

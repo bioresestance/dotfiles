@@ -24,6 +24,7 @@ with lib;
     services.udev.packages = [
       pkgs.platformio-core
       pkgs.openocd
+      pkgs.segger-jlink
     ];
   };
 

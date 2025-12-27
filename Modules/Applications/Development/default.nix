@@ -26,6 +26,12 @@ in
       ]);
     in
     {
+      nixpkgs.config.permittedInsecurePackages = [
+        "segger-jlink-qt4-874"
+        "snapmaker-luban-4.15.0"
+      ];
+      nixpkgs.config.segger-jlink.acceptLicense = true;
+
       environment.systemPackages = [
         globalPython
         pkgs.python313Packages.pipx
@@ -63,13 +69,19 @@ in
         # Infrastructure as Code
 
         # Other Development Tools
+        direnv
         platformio
         avrdude
+        openocd
+        segger-jlink
         mongodb-tools
         hugo
         github-copilot-cli
         gh
         jq
+        iperf3
+        unzip
+        traceroute
       ]);
     }
   );
