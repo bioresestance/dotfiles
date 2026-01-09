@@ -57,6 +57,7 @@ in
         # Languages and Runtimes
         go
         jdk21_headless
+        nodejs_22
 
         # Version Control
         git
@@ -82,6 +83,7 @@ in
         iperf3
         unzip
         traceroute
+        minicom
       ]);
     }
   );
