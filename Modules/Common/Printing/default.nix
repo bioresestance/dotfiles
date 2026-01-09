@@ -7,6 +7,10 @@
 with lib;
 let
   cfg = config.module.common.printing;
+  cnijfilter2Fixed = pkgs.cnijfilter2.overrideAttrs (old: {
+    # Force older C standard so the driver builds with GCC 14 (defaults to gnu23)
+    NIX_CFLAGS_COMPILE = (old.NIX_CFLAGS_COMPILE or "") + " -std=gnu99";
+  });
 in
 {
   options = {
@@ -32,7 +36,7 @@ in
       # pkgs.brlaser # — Drivers for some Brother printers
       pkgs.brgenml1lpr # — Generic drivers for more Brother printers [1]
       pkgs.brgenml1cupswrapper # — Generic drivers for more Brother printers [1]
-      pkgs.cnijfilter2 # — Drivers for some Canon Pixma devices (Proprietary driver)
+      cnijfilter2Fixed # — Drivers for some Canon Pixma devices (Proprietary driver)
     ];
 
     services.avahi = {
