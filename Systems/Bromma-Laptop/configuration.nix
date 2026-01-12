@@ -69,9 +69,11 @@ in
   boot.kernelParams = [
     "amdgpu.exp_hw_support=1" # For experimental GPU support, if applicable
 
-    # MT7925 WiFi stability fixes - disable power saving to prevent driver deadlocks
+    # MT7925 WiFi stability fixes - disable ASPM power management to prevent driver deadlocks
     "mt7925e.disable_aspm=1"
-    "mt76.disable_power_save=1"
+
+    # PCIe power management - disable ASPM globally for more stability (can help with warm boot issues)
+    "pcie_aspm=off"
 
     # System stability - enable watchdog and panic handling
     "panic=10" # Reboot 10 seconds after kernel panic
