@@ -9,7 +9,9 @@ let
   cfg = config.module.common.printing;
   cnijfilter2Fixed = pkgs.cnijfilter2.overrideAttrs (old: {
     # Force older C standard so the driver builds with GCC 14 (defaults to gnu23)
-    NIX_CFLAGS_COMPILE = (old.NIX_CFLAGS_COMPILE or "") + " -std=gnu99";
+    env = (old.env or { }) // {
+      NIX_CFLAGS_COMPILE = ((old.env.NIX_CFLAGS_COMPILE or "") + " -std=gnu99");
+    };
   });
 in
 {
