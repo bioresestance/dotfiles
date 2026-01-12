@@ -68,6 +68,18 @@ in
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.kernelParams = [
     "amdgpu.exp_hw_support=1" # For experimental GPU support, if applicable
+
+    # MT7925 WiFi stability fixes - disable power saving to prevent driver deadlocks
+    "mt7925e.disable_aspm=1"
+    "mt76.disable_power_save=1"
+
+    # System stability - enable watchdog and panic handling
+    "panic=10" # Reboot 10 seconds after kernel panic
+    "kernel.hung_task_panic=1" # Panic (and thus reboot) on hung tasks
+    "kernel.hung_task_timeout_secs=300" # Wait 5 minutes before declaring hung
+
+    # Disable PSR (Panel Self Refresh) which can cause display/system hangs on some AMD iGPUs
+    "amdgpu.dcdebugmask=0x10"
   ];
   boot.blacklistedKernelModules = [
     "nouveau"
@@ -78,12 +90,36 @@ in
   #systemd configurations
   systemd.settings.Manager = {
     DefaultTimeoutStopSec = "30s";
+    # Force shutdown even if services don't stop cleanly
+    DefaultTimeoutAbortSec = "30s";
+    # Watchdog configuration for system manager
+    RuntimeWatchdogSec = "30s";
+    RebootWatchdogSec = "5min";
+    KExecWatchdogSec = "5min";
   };
 
   # Improve shutdown behavior for user services
   systemd.user.extraConfig = ''
     DefaultTimeoutStopSec=15s
+    DefaultTimeoutAbortSec=15s
   '';
+
+  # Enable systemd-oomd for better handling of memory pressure situations
+  systemd.oomd.enable = true;
+
+  # Kernel sysctl settings for stability
+  boot.kernel.sysctl = {
+    # Hung task detection - panic on hung tasks to force reboot instead of permanent freeze
+    "kernel.hung_task_panic" = 1;
+    "kernel.hung_task_timeout_secs" = 300; # 5 minutes
+
+    # VM/memory tuning to reduce pressure that can trigger driver issues
+    "vm.dirty_ratio" = 10;
+    "vm.dirty_background_ratio" = 5;
+
+    # Network stability tuning
+    "net.core.netdev_max_backlog" = 4096;
+  };
 
   # Enable hardware modules
   module.hardware.audio.enable = true;
@@ -92,6 +128,7 @@ in
     hostName = "Bromma-Laptop";
     bluetooth.enable = true;
     mt7925FirmwareUpdate.enable = true; # Use latest upstream mt7925 WiFi firmware
+    useIwd = true; # Use iwd instead of wpa_supplicant - more stable with mt76 drivers
   };
   module.hardware.gpu.hybrid = {
     enable = true;

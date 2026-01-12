@@ -30,6 +30,17 @@ in
       type = types.bool;
     };
 
+    module.hardware.networking.useIwd = mkOption {
+      description = ''
+        Use iwd (iNet Wireless Daemon) as the WiFi backend instead of wpa_supplicant.
+        iwd is generally more stable and efficient, especially with newer WiFi chipsets
+        like the MediaTek mt7925. This can help prevent system lockups caused by
+        wpa_supplicant interactions with problematic drivers.
+      '';
+      default = false;
+      type = types.bool;
+    };
+
     module.hardware.networking.disable_mt7925 = mkOption {
       description = ''
         Temporarily blacklist the MediaTek `mt7925` WiFi modules to work around
@@ -45,7 +56,25 @@ in
   config = mkIf cfg.enable {
     # Enable networking
     networking.hostName = cfg.hostName;
-    networking.networkmanager.enable = true;
+    networking.networkmanager = {
+      enable = true;
+      # Use iwd as WiFi backend if enabled (more stable with mt76 drivers)
+      wifi.backend = if cfg.useIwd then "iwd" else "wpa_supplicant";
+    };
+
+    # Enable iwd service if using iwd backend
+    networking.wireless.iwd = mkIf cfg.useIwd {
+      enable = true;
+      settings = {
+        General = {
+          # Disable power saving to prevent driver deadlocks
+          EnableNetworkConfiguration = false; # Let NetworkManager handle IP config
+        };
+        Settings = {
+          AutoConnect = true;
+        };
+      };
+    };
 
     # Enable Bluetooth
     hardware.bluetooth = mkIf cfg.bluetooth.enable {
