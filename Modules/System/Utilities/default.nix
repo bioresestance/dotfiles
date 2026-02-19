@@ -56,7 +56,7 @@ in
       cifs-utils
 
       # File System and Storage
-      xorg.xrandr
+      xrandr
 
       # Scanning and Imaging
       simple-scan

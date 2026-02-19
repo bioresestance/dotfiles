@@ -23,7 +23,7 @@
     in
     {
       # Formatter for 'nix fmt'
-      formatter.${system} = pkgs.nixfmt-rfc-style;
+      formatter.${system} = pkgs.nixfmt;
 
       # Apps for common tasks
       apps.${system} = {
@@ -37,7 +37,7 @@
                 ! -path "./.git/*" \
                 ! -path "./result/*" \
                 ! -path "./result-*/*" \
-                -print0 | xargs -0 ${pkgs.nixfmt-rfc-style}/bin/nixfmt
+                -print0 | xargs -0 ${pkgs.nixfmt}/bin/nixfmt
               echo "✓ All files formatted!"
             ''
           );
@@ -52,7 +52,7 @@
                 ! -path "./.git/*" \
                 ! -path "./result/*" \
                 ! -path "./result-*/*" \
-                -print0 | xargs -0 ${pkgs.nixfmt-rfc-style}/bin/nixfmt --check
+                -print0 | xargs -0 ${pkgs.nixfmt}/bin/nixfmt --check
               echo "✓ All files are properly formatted!"
             ''
           );

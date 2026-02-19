@@ -63,7 +63,7 @@ in
         git
 
         # Code Quality and Linting
-        nixfmt-rfc-style
+        nixfmt
         nixd
         ansible-lint
 
