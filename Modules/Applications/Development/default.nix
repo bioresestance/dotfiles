@@ -52,7 +52,9 @@ in
         extra-cmake-modules
         stdenv.cc.cc.lib
         just
-        conan
+        (conan.overridePythonAttrs (old: {
+          pythonRelaxDeps = (old.pythonRelaxDeps or [ ]) ++ [ "patch-ng" ];
+        }))
 
         # Languages and Runtimes
         go

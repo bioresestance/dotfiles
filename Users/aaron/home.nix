@@ -223,7 +223,7 @@ in
     plexamp
     gimp
     kicad
-    freecad-wayland
+    # freecad-wayland # TODO: Disabled — fails to build with Boost 1.89 (missing boost_system cmake config)
     cheese
 
     # Office and Productivity

@@ -51,8 +51,8 @@ in
     hardware.sane.enable = true;
     hardware.sane.extraBackends = [
       pkgs.epkowa
-      pkgs.utsushi
+      # pkgs.utsushi # TODO: Disabled — imagescan-3.65.0 fails to build on current nixpkgs (Boost library detection issue)
     ];
-    services.udev.packages = [ pkgs.utsushi ];
+    # services.udev.packages = [ pkgs.utsushi ]; # TODO: Re-enable with utsushi above
   };
 }

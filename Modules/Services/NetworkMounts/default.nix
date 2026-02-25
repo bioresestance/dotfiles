@@ -66,7 +66,7 @@ in
     # Configure CIFS mount wrapper for proper permissions
     security.wrappers = {
       "mount.cifs" = {
-        source = "${pkgs.cifs-utils}/bin/mount.cifs";
+        source = "${pkgs.cifs-utils.bin}/bin/mount.cifs";
         setuid = true;
         owner = "root";
         group = "root";
