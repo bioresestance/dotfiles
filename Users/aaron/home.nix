@@ -190,6 +190,7 @@ in
       celeste = prev.celeste.overrideAttrs (old: {
         patches = (old.patches or [ ]) ++ [ ./patches/celeste-let-chains.patch ];
       });
+      remarkable = prev.callPackage ./packages/remarkable.nix { };
     })
   ];
 
@@ -207,6 +208,7 @@ in
     usbutils
     wakeonlan
     transmission_4
+    pandoc
 
     # Desktop Applications
     google-chrome
@@ -217,6 +219,7 @@ in
     celeste
     moonlight-qt
     obsidian
+    remarkable
 
     # Media and Creative
     vlc
