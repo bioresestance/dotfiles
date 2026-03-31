@@ -27,6 +27,8 @@ in
   config = mkIf cfg.enable {
     # Enable CUPS to print documents.
     services.printing.enable = true;
+    services.printing.browsing = true;
+    services.printing.browsed.enable = false; # Disabled — creates unreliable implicitclass:// queues; use direct socket:// connections instead
     services.printing.drivers = [
       pkgs.gutenprint # — Drivers for many different printers from many different vendors.
       pkgs.gutenprintBin # — Additional, binary-only drivers for some printers.
@@ -35,7 +37,7 @@ in
       pkgs.postscript-lexmark # — Postscript drivers for Lexmark
       pkgs.samsung-unified-linux-driver # — Proprietary Samsung Drivers
       pkgs.splix # — Drivers for printers supporting SPL (Samsung Printer Language).
-      # pkgs.brlaser # — Drivers for some Brother printers
+      pkgs.brlaser # — Drivers for some Brother printers
       pkgs.brgenml1lpr # — Generic drivers for more Brother printers [1]
       pkgs.brgenml1cupswrapper # — Generic drivers for more Brother printers [1]
       cnijfilter2Fixed # — Drivers for some Canon Pixma devices (Proprietary driver)
@@ -45,6 +47,10 @@ in
       enable = true;
       nssmdns4 = true;
       openFirewall = true;
+      publish = {
+        enable = true;
+        userServices = true; # Allow CUPS to publish printers via Avahi
+      };
     };
 
     # Scanner support
