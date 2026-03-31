@@ -358,6 +358,7 @@ in
         email = "aaron@bromma.dev";
       };
       init.defaultBranch = "main";
+      core.hooksPath = ".githooks";
     };
   };
 
