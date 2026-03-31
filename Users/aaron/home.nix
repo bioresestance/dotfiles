@@ -77,6 +77,88 @@ let
     }
   '';
 
+  vscodeRecentProjects = pkgs.writeShellApplication {
+    name = "vscode-recent-projects";
+    runtimeInputs = [
+      pkgs.sqlite
+      pkgs.jq
+      pkgs.python3
+      pkgs.coreutils
+    ];
+    text = ''
+            DB="$HOME/.config/Code/User/globalStorage/state.vscdb"
+            OUTPUT="$HOME/.local/share/applications/code.desktop"
+            MAX_ENTRIES=10
+
+            if [[ ! -f "$DB" ]]; then
+              echo "VS Code state database not found, skipping" >&2
+              exit 0
+            fi
+
+            mkdir -p "$(dirname "$OUTPUT")"
+
+            # Extract recent local folders from VS Code's SQLite database
+            json=$(sqlite3 "$DB" "SELECT value FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList';")
+
+            # Build action IDs and sections
+            action_ids=""
+            action_sections=""
+            i=0
+
+            while IFS= read -r uri; do
+              [[ -z "$uri" ]] && continue
+
+              # Decode file:// URI to filesystem path
+              path=$(python3 -c "import sys, urllib.parse; print(urllib.parse.unquote(urllib.parse.urlparse(sys.argv[1]).path))" "$uri")
+
+              # Skip if directory doesn't exist
+              [[ ! -d "$path" ]] && continue
+
+              name=$(basename "$path")
+              action_id="recent-$i"
+
+              if [[ -n "$action_ids" ]]; then
+                action_ids="$action_ids;$action_id"
+              else
+                action_ids="$action_id"
+              fi
+
+              action_sections="$action_sections
+      [Desktop Action $action_id]
+      Exec=code \"$path\"
+      Icon=folder-vscode
+      Name=$name
+      "
+              i=$((i + 1))
+            done < <(echo "$json" | jq -r '.entries[] | select(.folderUri != null) | select(.folderUri | startswith("file://")) | .folderUri' | head -n "$MAX_ENTRIES")
+
+            # Write the desktop file
+            cat > "$OUTPUT" << EOF
+      [Desktop Entry]
+      Actions=new-empty-window;$action_ids
+      Categories=Utility;TextEditor;Development;IDE
+      Comment=Code Editing. Redefined.
+      Exec=code %F
+      GenericName=Text Editor
+      Icon=vscode
+      Keywords=vscode
+      Name=Visual Studio Code
+      StartupNotify=true
+      StartupWMClass=Code
+      Type=Application
+      Version=1.5
+
+      [Desktop Action new-empty-window]
+      Exec=code --new-window %F
+      Icon=vscode
+      Name=New Empty Window
+      $action_sections
+      EOF
+
+            echo "Updated VS Code desktop file with $i recent projects"
+    '';
+  };
+
   autoWallpaperSwitch = pkgs.writeShellApplication {
     name = "wallpaper-auto-switch";
     runtimeInputs = [
@@ -500,6 +582,30 @@ in
   programs.rofi = {
     enable = true;
     theme = rofiCatppuccinTheme;
+  };
+
+  # Update VS Code desktop file with recent projects for KDE jump list
+  systemd.user.services.vscode-recent-projects = {
+    Unit = {
+      Description = "Update VS Code desktop entry with recent projects";
+    };
+    Service = {
+      Type = "oneshot";
+      ExecStart = "${vscodeRecentProjects}/bin/vscode-recent-projects";
+    };
+  };
+
+  systemd.user.timers.vscode-recent-projects = {
+    Unit = {
+      Description = "Periodically update VS Code recent projects jump list";
+    };
+    Timer = {
+      OnStartupSec = "10s";
+      OnUnitActiveSec = "5m";
+    };
+    Install = {
+      WantedBy = [ "timers.target" ];
+    };
   };
 
   # Auto-switch wallpaper folders between laptop (16:10) and ultrawide (32:9)
