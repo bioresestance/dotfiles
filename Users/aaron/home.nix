@@ -343,7 +343,6 @@ in
     ll = "ls -l";
     ".." = "cd ..";
     home-rebuild = "home-manager switch --flake /home/aaron/.dotfiles";
-    nix-rebuild = "sudo nixos-rebuild switch --flake /home/aaron/.dotfiles";
     ls = "eza -l";
   };
 
@@ -393,6 +392,43 @@ in
     initContent = ''
       source ~/.config/zsh/catppuccin_zsh-syntax-highlighting.zsh
       fastfetch
+
+      nix-rebuild() {
+        local flake="/home/aaron/.dotfiles"
+        local errors=0
+
+        echo "==> Updating flake inputs..."
+        if ! nix flake update --flake "$flake"; then
+          echo "ERROR: Flake update failed. Aborting."
+          return 1
+        fi
+
+        echo ""
+        echo "==> Rebuilding NixOS system..."
+        if sudo nixos-rebuild switch --flake "$flake"; then
+          echo "NixOS rebuild succeeded."
+        else
+          echo "ERROR: NixOS rebuild failed."
+          errors=$((errors + 1))
+        fi
+
+        echo ""
+        echo "==> Rebuilding home-manager..."
+        if home-manager switch --flake "$flake"; then
+          echo "Home-manager rebuild succeeded."
+        else
+          echo "ERROR: Home-manager rebuild failed."
+          errors=$((errors + 1))
+        fi
+
+        echo ""
+        if [[ $errors -eq 0 ]]; then
+          echo "All rebuilds completed successfully."
+        else
+          echo "$errors rebuild(s) failed."
+          return 1
+        fi
+      }
     '';
     enableCompletion = true;
     syntaxHighlighting.enable = true;
