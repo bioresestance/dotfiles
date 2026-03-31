@@ -90,7 +90,7 @@ in
     # Optional mitigation: blacklist mt7925 modules if requested
     environment.etc = lib.mkIf cfg.disable_mt7925 {
       # add a small note file so it's easy to see why modules are blacklisted
-      "mt7925-blacklist-note".text = ''Blacklisted mt7925 modules via NixOS config.'';
+      "mt7925-blacklist-note".text = "Blacklisted mt7925 modules via NixOS config.";
     };
 
     boot.blacklistedKernelModules = lib.optional cfg.disable_mt7925 [
