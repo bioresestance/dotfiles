@@ -55,6 +55,9 @@ in
       sshpass
       cifs-utils
 
+      # Cryptography
+      openssl
+
       # File System and Storage
       xrandr
 
