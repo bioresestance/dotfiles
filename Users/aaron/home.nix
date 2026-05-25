@@ -175,6 +175,22 @@ let
 
                         log() { printf '[wallpaper-auto-switch] %s\n' "$*" >&2; }
 
+                              # Wait for a Wayland (or X11) session to be available before invoking
+                              # Qt-based tools like kscreen-doctor; otherwise Qt aborts in
+                              # init_platform when no QPA platform can be initialized.
+                              wait_for_session() {
+                                local tries=0
+                                while [[ -z "''${WAYLAND_DISPLAY:-}" && -z "''${DISPLAY:-}" ]]; do
+                                  if (( tries >= 60 )); then
+                                    log "No WAYLAND_DISPLAY/DISPLAY after 60s; exiting to let systemd retry"
+                                    exit 0
+                                  fi
+                                  sleep 1
+                                  tries=$((tries + 1))
+                                done
+                              }
+                              wait_for_session
+
                               NORMAL_DIR="/home/aaron/Pictures/Wallpaper"
                               WIDE_DIR="/home/aaron/Pictures/Wallpaper-Widescreen"
                               THRESHOLD=2.4
@@ -365,7 +381,7 @@ in
   programs.ssh = {
     enable = true;
     enableDefaultConfig = false;
-    matchBlocks = {
+    settings = {
       # Use the 1Password SSH agent for all hosts.
       "*" = {
         identityAgent = "~/.1password/agent.sock";
@@ -396,6 +412,7 @@ in
 
       nix-rebuild() {
         local flake="/home/aaron/.dotfiles"
+        local subcommand="''${1:-switch}"
         local errors=0
 
         echo "==> Updating flake inputs..."
@@ -405,21 +422,75 @@ in
         fi
 
         echo ""
-        echo "==> Rebuilding NixOS system..."
-        if sudo nixos-rebuild switch --flake "$flake"; then
+        echo "==> Formatting Nix files..."
+        if (cd "$flake" && ./scripts/format.sh); then
+          echo "Lint cleanup succeeded."
+        else
+          echo "WARNING: Lint cleanup failed; continuing."
+        fi
+
+        echo ""
+        echo "==> Committing and pushing flake changes..."
+        if [[ -d "$flake/.git" ]]; then
+          (
+            cd "$flake" || exit 1
+            # Detect changes that existed before this run (i.e. untracked or
+            # modifications not produced by the flake update / formatter).
+            # We do this by checking whether anything other than flake.lock
+            # and *.nix files is dirty.
+            local preexisting
+            preexisting=$(git status --porcelain | awk '{ print $2 }' \
+              | grep -Ev '^(flake\.lock|.*\.nix)$' || true)
+            if [[ -n "$preexisting" ]]; then
+              echo "WARNING: Repository has pre-existing changes; skipping git commit/push:"
+              echo "$preexisting" | sed 's/^/  - /'
+              exit 0
+            fi
+
+            if git diff --quiet && git diff --cached --quiet; then
+              echo "No flake changes to commit."
+              exit 0
+            fi
+
+            if ! git add -A; then
+              echo "WARNING: git add failed; skipping commit/push."
+              exit 0
+            fi
+            if ! git commit -m "Updated flake"; then
+              echo "WARNING: git commit failed; skipping push."
+              exit 0
+            fi
+            if ! git push; then
+              echo "WARNING: git push failed; continuing."
+              exit 0
+            fi
+            echo "Git commit/push succeeded."
+          )
+        else
+          echo "WARNING: $flake is not a git repository; skipping commit/push."
+        fi
+
+        echo ""
+        echo "==> Rebuilding NixOS system ($subcommand)..."
+        if sudo nixos-rebuild "$subcommand" --flake "$flake"; then
           echo "NixOS rebuild succeeded."
         else
           echo "ERROR: NixOS rebuild failed."
           errors=$((errors + 1))
         fi
 
-        echo ""
-        echo "==> Rebuilding home-manager..."
-        if home-manager switch --flake "$flake"; then
-          echo "Home-manager rebuild succeeded."
+        if [[ "$subcommand" == "switch" ]]; then
+          echo ""
+          echo "==> Rebuilding home-manager..."
+          if home-manager switch --flake "$flake"; then
+            echo "Home-manager rebuild succeeded."
+          else
+            echo "ERROR: Home-manager rebuild failed."
+            errors=$((errors + 1))
+          fi
         else
-          echo "ERROR: Home-manager rebuild failed."
-          errors=$((errors + 1))
+          echo ""
+          echo "==> Skipping home-manager (subcommand is '$subcommand', not 'switch')."
         fi
 
         echo ""
@@ -650,16 +721,17 @@ in
     Unit = {
       Description = "Auto-select Plasma wallpaper folder based on screen aspect ratio";
       After = [ "graphical-session.target" ];
-      Wants = [ "graphical-session.target" ];
+      Requisite = [ "graphical-session.target" ];
+      PartOf = [ "graphical-session.target" ];
     };
     Service = {
       Type = "simple";
       ExecStart = "${autoWallpaperSwitch}/bin/wallpaper-auto-switch";
-      Restart = "always";
+      Restart = "on-failure";
       RestartSec = 10;
     };
     Install = {
-      WantedBy = [ "default.target" ];
+      WantedBy = [ "graphical-session.target" ];
     };
   };
 

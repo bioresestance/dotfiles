@@ -34,7 +34,11 @@ in
 
       environment.systemPackages = [
         globalPython
-        pkgs.python313Packages.pipx
+        (pkgs.python313Packages.pipx.overridePythonAttrs (_: {
+          # Tests fail on nixpkgs unstable due to packaging lib output formatting changes.
+          doCheck = false;
+          doInstallCheck = false;
+        }))
       ]
       ++ (with pkgs; [
         # IDEs and Editors
@@ -49,11 +53,13 @@ in
         libgcc
         gnumake
         cmake
-        extra-cmake-modules
+        kdePackages.extra-cmake-modules
         stdenv.cc.cc.lib
         just
         (conan.overridePythonAttrs (old: {
           pythonRelaxDeps = (old.pythonRelaxDeps or [ ]) ++ [ "patch-ng" ];
+          doCheck = false;
+          doInstallCheck = false;
         }))
 
         # Languages and Runtimes
