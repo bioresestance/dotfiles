@@ -336,6 +336,7 @@ in
 
     # Development
     hugo
+    spec-kit
 
     # KDE Applications
     kdePackages.okular
