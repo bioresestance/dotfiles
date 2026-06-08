@@ -42,7 +42,6 @@ in
       ]
       ++ (with pkgs; [
         # IDEs and Editors
-        vscode
         jetbrains.clion
 
         # Build Tools
