@@ -1,0 +1,55 @@
+{ pkgs, ... }:
+
+{
+  home.packages = with pkgs; [
+    # Shell and Terminal
+    eza
+    cmatrix
+    cowsay
+    oh-my-zsh
+    fastfetch
+    kitty-themes
+    cascadia-code
+    zsh-autosuggestions
+    oh-my-posh
+    usbutils
+    wakeonlan
+    transmission_4
+    pandoc
+
+    # Desktop Applications
+    google-chrome
+    vivaldi
+    discord
+    thunderbird
+    zoom-us
+    celeste
+    moonlight-qt
+    obsidian
+    remarkable
+
+    # Media and Creative
+    vlc
+    plexamp
+    gimp
+    kicad
+    # freecad-wayland # TODO: Disabled - fails to build with Boost 1.89 (missing boost_system cmake config)
+    cheese
+
+    # Office and Productivity
+    libreoffice
+    stirling-pdf
+
+    # File Management and Transfer
+    filezilla
+
+    # Development
+    hugo
+    spec-kit
+    cursor-cli
+
+    # KDE Applications
+    kdePackages.okular
+    kdePackages.kate
+  ];
+}
