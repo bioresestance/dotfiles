@@ -289,6 +289,7 @@ in
         patches = (old.patches or [ ]) ++ [ ./patches/celeste-let-chains.patch ];
       });
       remarkable = prev.callPackage ./packages/remarkable.nix { };
+      spec-kit = prev.callPackage ./packages/spec-kit.nix { };
     })
   ];
 
@@ -336,6 +337,7 @@ in
 
     # Development
     hugo
+    spec-kit
     cursor-cli
 
     # KDE Applications
