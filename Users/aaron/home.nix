@@ -337,6 +337,7 @@ in
     # Development
     hugo
     spec-kit
+    cursor-cli
 
     # KDE Applications
     kdePackages.okular
@@ -361,6 +362,10 @@ in
     ".." = "cd ..";
     home-rebuild = "home-manager switch --flake /home/aaron/.dotfiles";
     ls = "eza -l";
+  };
+
+  programs.cursor = {
+    enable = true;
   };
 
   programs.bash = {
