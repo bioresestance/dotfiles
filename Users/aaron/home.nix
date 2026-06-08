@@ -366,6 +366,7 @@ in
 
   programs.cursor = {
     enable = true;
+    mutableExtensionsDir = true;
   };
 
   programs.bash = {
