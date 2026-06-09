@@ -14,6 +14,7 @@
       });
       remarkable = prev.callPackage ../packages/remarkable.nix { };
       spec-kit = prev.callPackage ../packages/spec-kit.nix { };
+      claude-code = prev.callPackage ../packages/claude-code.nix { };
     })
   ];
 
