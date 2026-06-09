@@ -16,6 +16,7 @@
     wakeonlan
     transmission_4
     pandoc
+    tea
 
     # Desktop Applications
     google-chrome
