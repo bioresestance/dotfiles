@@ -28,6 +28,7 @@
     moonlight-qt
     obsidian
     remarkable
+    claude-code
 
     # Media and Creative
     vlc
