@@ -102,10 +102,10 @@ in
   };
 
   # Improve shutdown behavior for user services
-  systemd.user.extraConfig = ''
-    DefaultTimeoutStopSec=15s
-    DefaultTimeoutAbortSec=15s
-  '';
+  systemd.user.settings.Manager = {
+    DefaultTimeoutStopSec = "15s";
+    DefaultTimeoutAbortSec = "15s";
+  };
 
   # Enable systemd-oomd for better handling of memory pressure situations
   systemd.oomd.enable = true;
