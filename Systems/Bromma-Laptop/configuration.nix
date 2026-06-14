@@ -161,6 +161,10 @@ in
         mountPoint = "/mnt/Homes";
         device = "//192.168.69.57/Homes";
       }
+      {
+        mountPoint = "/mnt/Backups";
+        device = "//192.168.69.57/Backups";
+      }
     ];
   };
 
