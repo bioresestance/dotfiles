@@ -69,6 +69,24 @@ in
         General = {
           # Disable power saving to prevent driver deadlocks
           EnableNetworkConfiguration = false; # Let NetworkManager handle IP config
+          # Reduce roam-hunting between nearby mesh nodes (defaults: -70 / -76)
+          RoamThreshold = -65;
+          RoamThreshold5G = -58;
+          CriticalRoamThreshold5G = -72;
+          RoamRetryInterval = 120;
+        };
+        Scan = {
+          # Background roam scans briefly drop the link on mt7925 mesh setups
+          DisableRoamingScan = true;
+        };
+        Rank = {
+          # Prefer lightly-loaded APs; avoids roaming to a busy mesh node for +3 dBm
+          HighUtilizationThreshold = 25;
+        };
+        DriverQuirks = {
+          DefaultInterface = "?*";
+          # mt7925e can wedge during PS transitions; matches existing ASPM mitigation
+          PowerSaveDisable = "mt7925e";
         };
         Settings = {
           AutoConnect = true;
