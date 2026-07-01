@@ -29,6 +29,7 @@
     obsidian
     remarkable
     claude-code
+    telegram-desktop
 
     # Media and Creative
     vlc
