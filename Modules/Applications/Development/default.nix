@@ -32,6 +32,27 @@ in
       ];
       nixpkgs.config.segger-jlink.acceptLicense = true;
 
+      programs.nix-ld = {
+        enable = true;
+        libraries = with pkgs; [
+          libglvnd
+          mesa
+
+          stdenv.cc.cc
+          zlib
+
+          libx11
+          libxext
+          libxrender
+          libsm
+          libice
+
+          fontconfig
+          freetype
+          glib
+        ];
+      };
+
       environment.systemPackages = [
         globalPython
         (pkgs.python313Packages.pipx.overridePythonAttrs (_: {
