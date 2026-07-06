@@ -50,6 +50,10 @@ in
           fontconfig
           freetype
           glib
+
+          expat
+          libGL
+
         ];
       };
 
