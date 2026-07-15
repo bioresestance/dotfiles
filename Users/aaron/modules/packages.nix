@@ -36,7 +36,6 @@
     plexamp
     gimp
     kicad
-    freecad-wayland
     cheese
 
     # Office and Productivity

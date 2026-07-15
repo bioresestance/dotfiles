@@ -101,6 +101,13 @@ in
     # Enable ASUS hardware control
     services.asusd.enable = true;
 
+    # The packaged asus-shutdown unit disables SIGKILL, which can leave an
+    # old process alive and fail nixos-rebuild when the service is restarted.
+    systemd.services.asus-shutdown = {
+      overrideStrategy = "asDropin";
+      serviceConfig.SendSIGKILL = mkForce true;
+    };
+
     # Enable all firmware
     hardware.enableAllFirmware = true;
 
