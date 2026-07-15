@@ -48,7 +48,6 @@
     # Development
     hugo
     spec-kit
-    cursor-cli
 
     # KDE Applications
     kdePackages.okular

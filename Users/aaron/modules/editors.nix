@@ -1,7 +1,9 @@
 { pkgs, ... }:
 
 let
-  sharedEditorSettings = {
+  jsonFormat = pkgs.formats.json { };
+
+  vscodeSettings = {
     "cmake.pinnedCommands" = [
       "workbench.action.tasks.configureTaskRunner"
       "workbench.action.tasks.runTask"
@@ -119,54 +121,7 @@ let
     "terminal.integrated.initialHint" = false;
   };
 
-  cursorEditorSettings = sharedEditorSettings // {
-    "cursor.cpp.disabledLanguages" = [
-      "plaintext"
-      "markdown"
-      "scminput"
-    ];
-  };
-
-  marketplaceEditorExtensions = pkgs.vscode-utils.extensionsFromVscodeMarketplace [
-    {
-      publisher = "alphabotsec";
-      name = "vscode-eclipse-keybindings";
-      version = "0.16.1";
-      sha256 = "sha256-VK4OS7fvpJsHracfHdC7blvh6qV0IJse4vdRud/yT/o=";
-    }
-    {
-      publisher = "qwtel";
-      name = "sqlite-viewer";
-      version = "0.10.6";
-      sha256 = "sha256-dN8uW1VMlaDZn2RGxerlpCil/l4FNKE3ZOp2PSV4pY0=";
-    }
-  ];
-
-  sharedEditorExtensions =
-    (with pkgs.vscode-extensions; [
-      bradlc.vscode-tailwindcss
-      catppuccin.catppuccin-vsc
-      catppuccin.catppuccin-vsc-icons
-      github.codespaces
-      jnoortheen.nix-ide
-      mechatroner.rainbow-csv
-      ms-azuretools.vscode-containers
-      ms-python.debugpy
-      ms-python.python
-      ms-python.vscode-pylance
-      ms-vscode-remote.remote-containers
-      ms-vscode-remote.remote-ssh
-      ms-vscode-remote.remote-ssh-edit
-      ms-vscode.cpptools
-      ms-vscode.remote-explorer
-      platformio.platformio-vscode-ide
-      redhat.ansible
-      redhat.vscode-yaml
-      samuelcolvin.jinjahtml
-      tailscale.vscode-tailscale
-      tamasfe.even-better-toml
-    ])
-    ++ marketplaceEditorExtensions;
+  vscodeSettingsFile = jsonFormat.generate "vscode-settings" vscodeSettings;
 
   vscodeRecentProjects = pkgs.writeShellApplication {
     name = "vscode-recent-projects";
@@ -251,23 +206,9 @@ let
   };
 in
 {
-  programs.vscode = {
-    enable = true;
-    mutableExtensionsDir = true;
-    profiles.default = {
-      userSettings = sharedEditorSettings;
-      extensions = sharedEditorExtensions;
-    };
-  };
+  programs.vscode.enable = true;
 
-  programs.cursor = {
-    enable = true;
-    mutableExtensionsDir = true;
-    profiles.default = {
-      userSettings = cursorEditorSettings;
-      extensions = sharedEditorExtensions;
-    };
-  };
+  xdg.configFile."Code/User/settings.json".source = vscodeSettingsFile;
 
   systemd.user.services.vscode-recent-projects = {
     Unit = {
