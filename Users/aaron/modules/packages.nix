@@ -17,6 +17,7 @@
     transmission_4
     pandoc
     tea
+    codex
 
     # Desktop Applications
     google-chrome
