@@ -46,7 +46,7 @@
 
     # File Management and Transfer
     filezilla
-    sync
+    taler-sync
 
     # Development
     hugo
