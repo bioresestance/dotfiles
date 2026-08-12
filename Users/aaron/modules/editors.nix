@@ -45,7 +45,8 @@ let
     };
     "redhat.telemetry.enabled" = false;
     "python.analysis.typeCheckingMode" = "standard";
-    "extensions.autoCheckUpdates" = false;
+    "extensions.autoCheckUpdates" = true;
+    "extensions.autoUpdate" = true;
     "update.mode" = "none";
     "files.autoSave" = "afterDelay";
     "editor.fontFamily" = "'cascadia code'";
@@ -130,55 +131,158 @@ let
       pkgs.jq
       pkgs.python3
       pkgs.coreutils
+      pkgs.kdePackages.kservice
     ];
     text = ''
-            DB="$HOME/.config/Code/User/globalStorage/state.vscdb"
             OUTPUT="$HOME/.local/share/applications/code.desktop"
             MAX_ENTRIES=10
+            STORAGE="$HOME/.config/Code/User/globalStorage/storage.json"
+            WORKSPACE_STORAGE="$HOME/.config/Code/User/workspaceStorage"
 
-            if [[ ! -f "$DB" ]]; then
-              echo "VS Code state database not found, skipping" >&2
-              exit 0
-            fi
+            declare -a entries=()
+            declare -A seen_paths=()
+
+            decode_file_uri() {
+              python3 -c "import sys, urllib.parse; print(urllib.parse.unquote(urllib.parse.urlparse(sys.argv[1]).path))" "$1"
+            }
+
+            add_uri() {
+              local uri="$1"
+              local path
+
+              [[ -n "$uri" ]] || return 0
+              [[ "$uri" == file://* ]] || return 0
+
+              path=$(decode_file_uri "$uri")
+              [[ -n "$path" ]] || return 0
+              [[ -d "$path" || -f "$path" ]] || return 0
+              [[ "$path" != /nix/store/* ]] || return 0
+              [[ "$path" != "$HOME"/.config/Code/Workspaces/* ]] || return 0
+              [[ "$path" != "$HOME"/.config/Code/User/agent-sessions.code-workspace ]] || return 0
+
+              if [[ -n "''${seen_paths[$path]+x}" ]]; then
+                return 0
+              fi
+
+              seen_paths["$path"]=1
+              entries+=("$path")
+            }
+
+            add_uris_from_jq() {
+              local source="$1"
+              local filter="$2"
+
+              [[ -f "$source" ]] || return 0
+
+              while IFS= read -r uri; do
+                add_uri "$uri"
+              done < <(jq -r "$filter" "$source" 2>/dev/null || true)
+            }
+
+            add_uris_from_legacy_state() {
+              local db="$1"
+              local json
+
+              [[ -f "$db" ]] || return 0
+
+              json=$(sqlite3 "$db" "SELECT value FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList';" 2>/dev/null || true)
+              [[ -n "$json" ]] || return 0
+
+              while IFS= read -r uri; do
+                add_uri "$uri"
+              done < <(
+                echo "$json" | jq -r '
+                  def as_uri:
+                    if type == "string" then .
+                    elif type == "object" then (.external? // (if .scheme? == "file" and .path? then "file://" + .path else empty end))
+                    else empty
+                    end;
+
+                  .entries[]? |
+                    (.folderUri? // .workspace?.configPath? // .workspaceUri? // .fileUri? // empty) |
+                    as_uri
+                ' 2>/dev/null || true
+              )
+            }
+
+            add_uris_from_agent_profiles() {
+              local db="$1"
+              local json
+
+              [[ -f "$db" ]] || return 0
+
+              json=$(sqlite3 "$db" "SELECT value FROM ItemTable WHERE key = 'sessions.recentlyPickedWorkspaces';" 2>/dev/null || true)
+              [[ -n "$json" ]] || return 0
+
+              while IFS= read -r uri; do
+                add_uri "$uri"
+              done < <(
+                echo "$json" | jq -r '
+                  .[]? |
+                    .uri? |
+                    if type == "string" then .
+                    elif type == "object" then (.external? // (if .scheme? == "file" and .path? then "file://" + .path else empty end))
+                    else empty
+                    end
+                ' 2>/dev/null || true
+              )
+            }
 
             mkdir -p "$(dirname "$OUTPUT")"
 
-            # Extract recent local folders from VS Code's SQLite database
-            json=$(sqlite3 "$DB" "SELECT value FROM ItemTable WHERE key = 'history.recentlyOpenedPathsList';")
+            add_uris_from_jq "$STORAGE" '
+              .windowsState.lastActiveWindow.folder? // empty,
+              .backupWorkspaces.folders[]?.folderUri? // empty
+            '
 
-            # Build action IDs and sections
+            if [[ -d "$WORKSPACE_STORAGE" ]]; then
+              while IFS= read -r uri; do
+                add_uri "$uri"
+              done < <(
+                for workspace_file in "$WORKSPACE_STORAGE"/*/workspace.json; do
+                  [[ -f "$workspace_file" ]] || continue
+                  uri=$(jq -r '.folder // .workspace // .configuration // empty' "$workspace_file" 2>/dev/null || true)
+                  [[ -n "$uri" ]] || continue
+                  printf '%s\t%s\n' "$(stat -c '%Y' "$workspace_file")" "$uri"
+                done | sort -rn | cut -f2-
+              )
+            fi
+
+            for db in "$HOME"/.config/Code/User/globalStorage/state.vscdb "$HOME"/.config/Code/User/profiles/*/globalStorage/state.vscdb; do
+              add_uris_from_legacy_state "$db"
+              add_uris_from_agent_profiles "$db"
+            done
+
+            add_uris_from_jq "$STORAGE" '
+              .profileAssociations.workspaces? | keys[]?
+            '
+
             action_ids=""
             action_sections=""
             i=0
 
-            while IFS= read -r uri; do
-              [[ -z "$uri" ]] && continue
+            for path in "''${entries[@]}"; do
+              if [[ $i -ge $MAX_ENTRIES ]]; then
+                break
+              fi
 
-              # Decode file:// URI to filesystem path
-              path=$(python3 -c "import sys, urllib.parse; print(urllib.parse.unquote(urllib.parse.urlparse(sys.argv[1]).path))" "$uri")
-
-              # Skip if directory doesn't exist
-              [[ ! -d "$path" ]] && continue
-
+              safe_path=''${path//\\/\\\\}
+              safe_path=''${safe_path//\"/\\\"}
               name=$(basename "$path")
+              name=''${name//$'\n'/ }
               action_id="recent-$i"
 
-              if [[ -n "$action_ids" ]]; then
-                action_ids="$action_ids;$action_id"
-              else
-                action_ids="$action_id"
-              fi
+              action_ids="$action_ids$action_id;"
 
               action_sections="$action_sections
       [Desktop Action $action_id]
-      Exec=code \"$path\"
+      Exec=code \"$safe_path\"
       Icon=folder-vscode
       Name=$name
       "
               i=$((i + 1))
-            done < <(echo "$json" | jq -r '.entries[] | select(.folderUri != null) | select(.folderUri | startswith("file://")) | .folderUri' | head -n "$MAX_ENTRIES")
+            done
 
-            # Write the desktop file
             cat > "$OUTPUT" << EOF
       [Desktop Entry]
       Actions=new-empty-window;$action_ids
@@ -200,6 +304,8 @@ let
       Name=New Empty Window
       $action_sections
       EOF
+
+            kbuildsycoca6 --noincremental >/dev/null 2>&1 || true
 
             echo "Updated VS Code desktop file with $i recent projects"
     '';
