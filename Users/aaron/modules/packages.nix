@@ -38,6 +38,7 @@
     gimp
     kicad
     cheese
+    feishin
 
     # Office and Productivity
     libreoffice
@@ -45,6 +46,7 @@
 
     # File Management and Transfer
     filezilla
+    sync
 
     # Development
     hugo
