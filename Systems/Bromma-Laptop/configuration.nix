@@ -168,6 +168,21 @@ in
     ];
   };
 
+  # Temporary NFS test: remove this filesystem and tmpfiles rule when finished.
+  fileSystems."/mnt/nfs-test/nfs-media" = {
+    device = "truenas.local:/mnt/MainPool/Media";
+    fsType = "nfs4";
+    options = [
+      "vers=4"
+      "proto=tcp"
+      "hard"
+      "timeo=600"
+      "retrans=2"
+      "_netdev"
+    ];
+  };
+  systemd.tmpfiles.rules = [ "d /mnt/nfs-test/nfs-media 0755 root root -" ];
+
   # Ensure Thunderbolt is properly configured
   services.hardware.bolt.enable = true;
 
