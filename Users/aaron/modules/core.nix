@@ -9,11 +9,6 @@
 
   nixpkgs.overlays = [
     (final: prev: {
-      celeste = prev.celeste.overrideAttrs (old: {
-        env = (old.env or { }) // {
-          RUSTC_BOOTSTRAP = "celeste";
-        };
-      });
       remarkable = prev.callPackage ../packages/remarkable.nix { };
       spec-kit = prev.callPackage ../packages/spec-kit.nix { };
       claude-code = prev.callPackage ../packages/claude-code.nix { };

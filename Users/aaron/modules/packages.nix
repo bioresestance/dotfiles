@@ -25,7 +25,6 @@
     discord
     thunderbird
     zoom-us
-    celeste
     moonlight-qt
     obsidian
     remarkable

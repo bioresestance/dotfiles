@@ -1,8 +1,6 @@
 { pkgs, ... }:
 
 let
-  jsonFormat = pkgs.formats.json { };
-
   vscodeSettings = {
     "cmake.pinnedCommands" = [
       "workbench.action.tasks.configureTaskRunner"
@@ -121,8 +119,6 @@ let
     "security.workspace.trust.untrustedFiles" = "open";
     "terminal.integrated.initialHint" = false;
   };
-
-  vscodeSettingsFile = jsonFormat.generate "vscode-settings" vscodeSettings;
 
   vscodeRecentProjects = pkgs.writeShellApplication {
     name = "vscode-recent-projects";
@@ -312,9 +308,14 @@ let
   };
 in
 {
-  programs.vscode.enable = true;
-
-  xdg.configFile."Code/User/settings.json".source = vscodeSettingsFile;
+  programs.vscode = {
+    enable = true;
+    profiles.default = {
+      # Allow VS Code to save settings; rebuilds merge in the declared values.
+      mutableUserSettings = true;
+      userSettings = vscodeSettings;
+    };
+  };
 
   systemd.user.services.vscode-recent-projects = {
     Unit = {
