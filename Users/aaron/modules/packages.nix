@@ -1,4 +1,4 @@
-{ pkgs, ... }:
+{ pkgs, inputs, ... }:
 
 {
   home.packages = with pkgs; [
@@ -48,6 +48,7 @@
     taler-sync
 
     # Development
+    inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.orca
     hugo
     spec-kit
 
