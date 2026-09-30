@@ -30,6 +30,14 @@
       # Formatter for 'nix fmt'
       formatter.${system} = pkgs.nixfmt;
 
+      # Development environment loaded by direnv via .envrc
+      devShells.${system}.default = pkgs.mkShell {
+        packages = [
+          pkgs.nixfmt
+          pkgs.nixd
+        ];
+      };
+
       # Apps for common tasks
       apps.${system} = {
         format = {
