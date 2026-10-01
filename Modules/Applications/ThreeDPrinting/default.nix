@@ -7,7 +7,7 @@
 with lib;
 {
   options = {
-    module.apps.ThreeDPrinting = {
+    module.apps.threeDPrinting = {
       enable = mkOption {
         description = "Enable 3D printing services and applications.";
         default = false;
@@ -17,7 +17,7 @@ with lib;
     };
   };
 
-  config = mkIf config.module.apps.ThreeDPrinting.enable {
+  config = mkIf config.module.apps.threeDPrinting.enable {
     environment.systemPackages = with pkgs; [
       snapmaker-luban
       orca-slicer

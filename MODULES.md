@@ -1,6 +1,7 @@
 # Module Organization Guide
 
-This document describes the organization of the modular NixOS configuration structure.
+This document describes reusable NixOS modules. Host-specific settings are in
+`Systems/Bromma-Laptop/`; Home Manager modules are in `Users/aaron/modules/`.
 
 ## Directory Structure
 
@@ -15,7 +16,6 @@ Modules/
 │   ├── Audio/                # PipeWire audio configuration
 │   ├── Networking/           # NetworkManager and Bluetooth
 │   └── GPU/
-│       ├── Nvidia/           # (Legacy) NVIDIA-only configuration
 │       └── Hybrid/           # NVIDIA + AMD hybrid GPU setup
 ├── Desktop/                  # Desktop environments
 │   └── Plasma/               # KDE Plasma 6 with SDDM
@@ -26,7 +26,7 @@ Modules/
 │   ├── Development/          # IDEs and development tools
 │   ├── Gaming/               # Steam and gaming support
 │   ├── Security/             # 1Password
-│   ├── 3DPrinting/          # 3D printing software
+│   ├── ThreeDPrinting/      # 3D printing software
 │   └── Tailscale/           # VPN service
 └── Users/                    # User account definitions
     └── aaron/                # User account configuration
@@ -34,7 +34,7 @@ Modules/
 
 ## Module Pattern
 
-All modules follow the NixOS module pattern with options:
+Feature modules generally follow the NixOS module pattern with options:
 
 ```nix
 {
@@ -62,6 +62,12 @@ in
 }
 ```
 
+Use PascalCase for reusable module directories and lower camel case for new
+option names. For example, `Modules/Applications/ThreeDPrinting` declares
+`module.apps.threeDPrinting`. Existing options such as
+`module.services.network-mounts` keep their current names until callers are
+deliberately migrated.
+
 ## Module Categories
 
 ### `module.hardware.*`
@@ -87,7 +93,6 @@ Automates daily flake updates, rebuilds, and git pushes. Key options:
 - `nixosTargets`: list of nixosConfiguration attributes to rebuild (defaults to the current `networking.hostName`).
 - `homeManagerTargets`: list of `{ user, flakeAttr }` pairs for home-manager rebuilds.
 - `notification.*`: `user` (whose DBus session receives the notification, defaults to the repo user), command, icon, timeout, and enable switch (defaults to `notify-send`, works well with KDE/Plasma but can be customized for other DEs).
-- `git.*`: commit message prefix, remote, branch, and push toggle. Push failures just show up in the notification and do not abort the update.
 - `git.*`: commit message prefix, remote, branch, and push toggle. SSH remotes work out of the box because the service bundles `openssh`; push failures just show up in the notification and do not abort the update.
 - `git.safeDirectories`: extra repositories to mark as Git safe when the service runs as root (defaults to the configured repo path).
 - `git.allowDirty`: set to true if you really want updates to continue even when the flake checkout has uncommitted changes (defaults to false, so the run aborts early with a notification instead of trampling your work in progress).
@@ -203,6 +208,7 @@ Example:
 4. **Document options**: Use clear descriptions for all options
 5. **Group related settings**: Don't create a 1-to-1 module per package unless it makes sense
 6. **Test on rebuild**: Always test with `sudo nixos-rebuild switch --flake` after changes
+7. **Keep host tuning local**: Put machine-specific boot, network, and device settings in `Systems/<host>/`; move a setting to `Modules/` when another host needs it
 
 ## Network Mounts (CIFS/SMB)
 

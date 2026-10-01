@@ -18,8 +18,8 @@ A modular, flake-based NixOS configuration with home-manager integration.
 
 2. **Review and customize:**
    - Edit `Systems/Bromma-Laptop/configuration.nix` (or create your own system)
-   - Update `Users/aaron/home.nix` with your preferences
-   - Modify `smb-credentials` if using network mounts
+   - Update modules under `Users/aaron/modules/` with your preferences
+   - Create an ignored `smb-credentials` file if using network mounts
 
 3. **Apply system configuration:**
    ```bash
@@ -43,11 +43,14 @@ A modular, flake-based NixOS configuration with home-manager integration.
 ├── Systems/                 # System configurations
 │   └── Bromma-Laptop/
 │       ├── configuration.nix
-│       └── hardware-configuration.nix
+│       ├── hardware-configuration.nix
+│       ├── networking.nix      # Host-specific networking and mounts
+│       └── stability.nix       # Host-specific boot/kernel tuning
 │
 ├── Users/                   # Home-manager configurations
 │   └── aaron/
-│       └── home.nix
+│       ├── home.nix            # Imports the user's modules
+│       └── modules/            # Home Manager configuration and source files
 │
 ├── Modules/                 # Reusable modules
 │   ├── Common/             # Base configuration
@@ -131,7 +134,7 @@ nix run .#check-format
 # Format specific files
 nixfmt path/to/file.nix
 
-# Format using script (alternative)
+# Run the same formatter directly (also accepts --check)
 ./scripts/format.sh
 ```
 
@@ -195,16 +198,16 @@ Quick reference:
 - **Hardware:** audio, networking, gpu.hybrid
 - **Desktop:** plasma
 - **Services:** virtualization, network-mounts
-- **Applications:** development (VS Code, Clang, Python 3.13 bundle w/ proxmoxer & pytest, Hugo, Ansible), gaming, security, ThreeDPrinting, tailscale
+- **Applications:** development (VS Code, Clang, Python 3.13 bundle w/ proxmoxer & pytest, Hugo, Ansible), gaming, security, threeDPrinting, tailscale
 - **System:** utilities, autoUpdate (automated flake updater)
 
 ## 🔒 Secrets Management
 
-⚠️ **Important:** The `smb-credentials` file is git-ignored but contains plaintext passwords.
+⚠️ **Important:** The `smb-credentials` file is git-ignored but contains plaintext passwords. It is not tracked by Git.
 
 **Recommendations:**
 - Use `sops-nix` or `agenix` for encrypted secrets management
-- See [IMPROVEMENTS.md](IMPROVEMENTS.md) for implementation guide
+- See [IMPROVEMENTS.md](IMPROVEMENTS.md) for the remaining secrets work
 
 ## 🐛 Troubleshooting
 
@@ -229,7 +232,7 @@ journalctl -u mnt-Media.mount     # View logs
 - [NixOS Manual](https://nixos.org/manual/nixos/stable/)
 - [Home Manager Manual](https://nix-community.github.io/home-manager/)
 - [Module Documentation](./MODULES.md)
-- [Planned Improvements](./IMPROVEMENTS.md)
+- [Maintenance Notes](./IMPROVEMENTS.md)
 
 ## 📄 License
 

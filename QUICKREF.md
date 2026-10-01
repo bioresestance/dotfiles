@@ -1,98 +1,49 @@
-# Quick Reference - NixOS Dotfiles
+# Quick Reference
 
-## 🚀 Essential Commands
+Run these from the repository root unless a path is shown.
 
-### System Management
-```bash
-nix-rebuild              # Rebuild system (alias)
-sudo nixos-rebuild switch --flake ~/.dotfiles
-```
-
-### Home Manager
-```bash
-home-rebuild             # Rebuild home (alias)
-home-manager switch --flake ~/.dotfiles
-```
-
-### Formatting
-```bash
-nix run .#format         # Format all Nix files
-nix run .#check-format   # Check formatting
-./scripts/format.sh      # Alternative format script
-```
-
-### Updates
-```bash
-nix flake update         # Update all inputs
-nix flake check          # Validate flake
-```
-
-### Cleanup
-```bash
-sudo nix-collect-garbage -d              # Clean old generations
-nix-store --optimize                     # Optimize store
-```
-
-## 📦 Available Apps
+## Rebuild
 
 ```bash
-nix run .#format         # Format all Nix files in repo
-nix run .#check-format   # Check formatting without changes
+sudo nixos-rebuild test --flake .#Bromma-Laptop
+sudo nixos-rebuild switch --flake .#Bromma-Laptop
+home-manager switch --flake .#aaron
 ```
 
-## 🔧 Module Quick Reference
+The `nix-rebuild` and `home-rebuild` shell aliases are defined in the Home
+Manager shell module.
 
-Enable in `configuration.nix`:
-
-```nix
-# Hardware
-module.hardware.audio.enable = true;
-module.hardware.networking.enable = true;
-module.hardware.gpu.hybrid.enable = true;
-
-# Desktop
-module.desktop.plasma.enable = true;
-
-# Services
-module.services.virtualization.enable = true;
-module.services.network-mounts.enable = true;
-
-# Applications
-module.apps.development.enable = true;
-module.apps.gaming.enable = true;
-module.apps.security.enable = true;
-
-# System automation
-module.system.autoUpdate.enable = true;  # configure repoPath + targets in configuration.nix
-```
-
-## 🐛 Troubleshooting
+## Check and format
 
 ```bash
-# Check system status
-systemctl status <service>
-journalctl -xe
+nix flake check
+nix run .#check-format
+nix run .#format
+```
 
-# Test configuration
-sudo nixos-rebuild test --flake ~/.dotfiles
+`scripts/format.sh [--check]` is the shared implementation used by both flake
+apps and CI. The pre-commit hook checks formatting without changing staged files.
 
-# Debug network mounts
-./debug-smb.sh
+## Update and diagnose
 
-# View errors
+```bash
+nix flake update
 nix flake check --show-trace
+systemctl status nix-flake-auto-update.service
+journalctl -u nix-flake-auto-update.service -n 200
+systemctl status mnt-Media.mount
 ```
 
-## 📁 Important Files
+## Where to edit
 
-- `flake.nix` - Flake entry point
-- `Systems/<hostname>/configuration.nix` - System config
-- `Users/<user>/home.nix` - Home-manager config
-- `MODULES.md` - Module documentation
-- `IMPROVEMENTS.md` - Planned improvements
+- `flake.nix`: flake inputs and system/home outputs
+- `Systems/Bromma-Laptop/configuration.nix`: enabled modules and host choices
+- `Systems/Bromma-Laptop/networking.nix`: mounts, dock network profile, and network hardware rules
+- `Systems/Bromma-Laptop/stability.nix`: boot, kernel, and systemd tuning
+- `Modules/`: reusable NixOS modules
+- `Users/aaron/modules/`: Home Manager configuration and editable source files
+- `MODULES.md`: module layout and options
+- `IMPROVEMENTS.md`: remaining maintenance work
 
-## 🔗 Quick Links
-
-- [Full README](./README.md)
-- [Module Docs](./MODULES.md)
-- [Improvements](./IMPROVEMENTS.md)
+See [README.md](README.md) for initial setup and [MODULES.md](MODULES.md)
+for module details.

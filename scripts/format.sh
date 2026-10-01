@@ -1,18 +1,22 @@
 #!/usr/bin/env bash
-# Format all Nix files in the repository
+set -euo pipefail
 
-set -e
-
-# Always format this repository, regardless of the caller's working directory.
 cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
 
-echo "Formatting Nix files..."
+case "${1:-}" in
+  "") formatter_args=() ;;
+  --check) formatter_args=(--check) ;;
+  *) echo "Usage: $0 [--check]" >&2; exit 2 ;;
+esac
 
-# Find all .nix files excluding result directories and format them
-find . -name "*.nix" -type f \
-  ! -path "./.git/*" \
-  ! -path "./result/*" \
-  ! -path "./result-*/*" \
-  -exec nixfmt {} +
+formatter=${DOTFILES_NIXFMT:-nixfmt}
+nix_files=()
+while IFS= read -r -d '' file; do
+  [[ -f "$file" ]] && nix_files+=("$file")
+done < <(git ls-files --cached --others --exclude-standard -z -- '*.nix')
 
-echo "✓ All files formatted!"
+if (( ${#nix_files[@]} == 0 )); then
+  exit 0
+fi
+
+"$formatter" "${formatter_args[@]}" "${nix_files[@]}"

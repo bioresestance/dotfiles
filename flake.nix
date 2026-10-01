@@ -25,6 +25,15 @@
       system = "x86_64-linux";
       lib = nixpkgs.lib;
       pkgs = nixpkgs.legacyPackages.${system};
+      formatApp = mode: {
+        type = "app";
+        program = toString (
+          pkgs.writeShellScript "format-nix" ''
+            export DOTFILES_NIXFMT=${pkgs.nixfmt}/bin/nixfmt
+            exec ${pkgs.bash}/bin/bash ./scripts/format.sh ${mode}
+          ''
+        );
+      };
     in
     {
       # Formatter for 'nix fmt'
@@ -38,38 +47,10 @@
         ];
       };
 
-      # Apps for common tasks
+      # Both apps use the same file selection and formatter script.
       apps.${system} = {
-        format = {
-          type = "app";
-          program = toString (
-            pkgs.writeShellScript "format" ''
-              set -e
-              echo "Formatting all Nix files..."
-              find . -name "*.nix" -type f \
-                ! -path "./.git/*" \
-                ! -path "./result/*" \
-                ! -path "./result-*/*" \
-                -print0 | xargs -0 ${pkgs.nixfmt}/bin/nixfmt
-              echo "✓ All files formatted!"
-            ''
-          );
-        };
-        check-format = {
-          type = "app";
-          program = toString (
-            pkgs.writeShellScript "check-format" ''
-              set -e
-              echo "Checking formatting of all Nix files..."
-              find . -name "*.nix" -type f \
-                ! -path "./.git/*" \
-                ! -path "./result/*" \
-                ! -path "./result-*/*" \
-                -print0 | xargs -0 ${pkgs.nixfmt}/bin/nixfmt --check
-              echo "✓ All files are properly formatted!"
-            ''
-          );
-        };
+        format = formatApp "";
+        check-format = formatApp "--check";
       };
 
       nixosConfigurations = {
