@@ -1,14 +1,9 @@
-# NixOS Dotfiles Configuration# Nixos 
+# NixOS Dotfiles Configuration
 
+A modular, flake-based NixOS configuration with home-manager integration.
 
+## 🚀 Quick Start
 
-A modular, flake-based NixOS configuration with home-manager integration.## Common Commands
-
-
-
-## 🚀 Quick Start### Clears the older packages and generations
-
-`sudo nix-collect-garbage -d`
 ### Prerequisites
 - NixOS installed with flakes enabled
 - Git configured
@@ -144,7 +139,6 @@ nixfmt path/to/file.nix
 
 - Enable `module.system.autoUpdate` in your system configuration to automatically run `nix flake update`, `nixos-rebuild switch`, and the configured home-manager switches once per day (first boot of the day, thanks to `Persistent=true`).
 - The module drops a script at `nix-flake-auto-update.service`/`.timer`, sends desktop notifications via `notify-send` by default, and rolls back `flake.lock` if a rebuild fails.
-- Git commits + pushes are handled automatically when the lockfile changes; push failures are reported in the notification but do not abort the update.
 - Git commits + pushes are handled automatically when the lockfile changes; `openssh` is bundled so Git can invoke your repo user's SSH remotes, and push failures are reported in the notification but do not abort the update.
 - Key knobs: `repoPath`, `repoUser` (run flake/git as the repo owner), `nixosTargets`, `homeManagerTargets`, `notification.user/command/icon` (run the notify command inside that user's session bus), `git.remote/branch`, `git.safeDirectories`, dirty-tree enforcement (`git.allowDirty`), and `timer` cadence. See `MODULES.md` for a complete example.
 - Check status/logs with:
@@ -228,8 +222,6 @@ sudo nixos-rebuild switch --flake ~/.dotfiles --show-trace  # Verbose
 ```bash
 systemctl status mnt-Media.mount  # Check status
 journalctl -u mnt-Media.mount     # View logs
-# Run debug-smb.sh for comprehensive diagnostics
-./debug-smb.sh
 ```
 
 ## 📚 Resources

@@ -3,6 +3,9 @@
 
 set -e
 
+# Always format this repository, regardless of the caller's working directory.
+cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.."
+
 echo "Formatting Nix files..."
 
 # Find all .nix files excluding result directories and format them
