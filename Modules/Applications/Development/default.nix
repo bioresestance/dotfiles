@@ -27,8 +27,7 @@ in
     in
     {
       nixpkgs.config.permittedInsecurePackages = [
-        "segger-jlink-qt4-874"
-        "segger-jlink-qt4-952"
+        "segger-jlink-qt4-970"
         "snapmaker-luban-4.15.0"
       ];
       nixpkgs.config.segger-jlink.acceptLicense = true;
