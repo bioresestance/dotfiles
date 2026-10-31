@@ -51,6 +51,7 @@
     inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.orca
     hugo
     spec-kit
+    openspec
 
     # KDE Applications
     kdePackages.okular
