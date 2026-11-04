@@ -63,7 +63,6 @@ in
 
       # Scanning and Imaging
       simple-scan
-      xsane
       naps2
 
       # Python Package Manager

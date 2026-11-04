@@ -47,9 +47,10 @@ in
       enable = true;
       nssmdns4 = true;
       openFirewall = true;
-      publish = {
-        enable = true;
-        userServices = true; # Allow CUPS to publish printers via Avahi
+      settings.publish = {
+        disable-publishing = false;
+        disable-user-service-publishing = false; # Allow CUPS to publish printers via Avahi
+        publish-addresses = true;
       };
     };
 
