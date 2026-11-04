@@ -85,6 +85,20 @@
   module.apps.threeDPrinting.enable = true;
   module.apps.tailscale.enable = true;
 
+  # Let aaron apply NixOS configurations without a sudo password prompt.
+  security.sudo.extraRules = [
+    {
+      users = [ "aaron" ];
+      runAs = "root";
+      commands = [
+        {
+          command = "/run/current-system/sw/bin/nixos-rebuild";
+          options = [ "NOPASSWD" ];
+        }
+      ];
+    }
+  ];
+
   # System utilities (enabled by default)
   module.system.utilities.enable = true;
 
