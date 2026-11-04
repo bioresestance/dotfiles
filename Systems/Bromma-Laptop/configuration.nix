@@ -67,6 +67,13 @@
 
   # Enable services
   module.services.virtualization.enable = true;
+  services.syncthing = {
+    enable = true;
+    user = "aaron";
+    group = "users";
+    dataDir = "/home/aaron";
+    openDefaultPorts = true;
+  };
 
   # Enable applications
   module.apps.development.enable = true;
