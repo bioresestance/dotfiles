@@ -1,11 +1,13 @@
 {
   config,
   lib,
+  pkgs,
   ...
 }:
 with lib;
 let
   cfg = config.module.apps.gaming;
+  opensave = pkgs.callPackage ./opensave.nix { };
 in
 {
   options = {
@@ -17,6 +19,8 @@ in
   };
 
   config = mkIf cfg.enable {
+    environment.systemPackages = [ opensave ];
+
     programs.steam = {
       enable = true;
       remotePlay.openFirewall = true;
