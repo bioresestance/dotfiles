@@ -48,10 +48,20 @@
     taler-sync
 
     # Development
-    inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.orca
+    (inputs.llm-agents.packages.${pkgs.stdenv.hostPlatform.system}.orca.overrideAttrs (old: {
+      # Orca checks this browser's upstream hash before copying it to an SSH host.
+      postFixup =
+        let
+          browserSearch = ''$(find "$out/lib/Orca/resources" -mindepth 1 -maxdepth 1 ! -name orcad-template)'';
+          preservedBrowserSearch = ''$(find "$out/lib/Orca/resources" -mindepth 1 -maxdepth 1 ! -name orcad-template ! -name agent-browser-linux-x64)'';
+        in
+        assert pkgs.lib.hasInfix browserSearch old.postFixup;
+        pkgs.lib.replaceStrings [ browserSearch ] [ preservedBrowserSearch ] old.postFixup;
+    }))
     hugo
     spec-kit
     openspec
+    godot
 
     # KDE Applications
     kdePackages.okular
