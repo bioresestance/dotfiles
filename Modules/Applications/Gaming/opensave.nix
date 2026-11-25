@@ -1,8 +1,8 @@
 {
-  autoPatchelfHook,
   fetchurl,
   gdk-pixbuf,
   glib,
+  glibc,
   gtk3,
   lib,
   libsoup_3,
@@ -10,6 +10,16 @@
   webkitgtk_4_1,
 }:
 
+let
+  libraryPath = lib.makeLibraryPath [
+    gdk-pixbuf
+    glib
+    glibc
+    gtk3
+    libsoup_3
+    webkitgtk_4_1
+  ];
+in
 stdenvNoCC.mkDerivation (finalAttrs: {
   pname = "opensave";
   version = "2.4.1";
@@ -20,24 +30,28 @@ stdenvNoCC.mkDerivation (finalAttrs: {
   };
 
   sourceRoot = "opensave-linux";
-  nativeBuildInputs = [ autoPatchelfHook ];
-  buildInputs = [
-    gdk-pixbuf
-    glib
-    gtk3
-    libsoup_3
-    webkitgtk_4_1
-  ];
-
   dontConfigure = true;
   dontBuild = true;
+  dontStrip = true;
 
   installPhase = ''
     runHook preInstall
 
-    install -Dm755 opensave "$out/bin/opensave"
-    install -Dm755 opensave-cli "$out/bin/opensave-cli"
-    install -Dm755 opensave-relay "$out/bin/opensave-relay"
+    for program in opensave opensave-cli opensave-relay; do
+      install -Dm755 "$program" "$out/libexec/opensave/$program"
+      mkdir -p "$out/bin"
+      cat > "$out/bin/$program" <<EOF
+    #!/bin/sh
+    EOF
+      if [ "$program" = opensave ]; then
+        echo 'export WEBKIT_DISABLE_COMPOSITING_MODE=1' >> "$out/bin/$program"
+      fi
+      cat >> "$out/bin/$program" <<EOF
+    exec ${glibc}/lib/ld-linux-x86-64.so.2 --library-path ${libraryPath} "$out/libexec/opensave/$program" "\$@"
+    EOF
+      chmod +x "$out/bin/$program"
+    done
+
     install -Dm644 opensave.desktop "$out/share/applications/opensave.desktop"
     install -Dm644 opensave.png "$out/share/icons/hicolor/512x512/apps/opensave.png"
     install -Dm644 man/opensave.1 "$out/share/man/man1/opensave.1"
